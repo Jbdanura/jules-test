@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Communities - Reddit Clone{% endblock %}
+
+{% block content %}
+    <h1>All Communities</h1>
+    {% if communities %}
+        <ul>
+            {% for community in communities %}
+                <li>
+                    <!-- Later, this will link to the community's page -->
+                    <strong>{{ community.name }}</strong>
+                    {% if community.description %}<p>{{ community.description }}</p>{% endif %}
+                    <small>Created by: {{ community.creator.username }} on {{ community.created_at.strftime('%Y-%m-%d') }}</small>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No communities yet. <a href="{{ url_for('communities.create_community') }}">Create one?</a></p>
+    {% endif %}
+    <p><a href="{{ url_for('communities.create_community') }}">Create a New Community</a></p>
+{% endblock %}
