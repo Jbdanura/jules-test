@@ -1,0 +1,43 @@
+/* Vote.module.css */
+
+.voteContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Space between buttons and score */
+}
+
+.voteButton {
+  /* Inherits global button styles from main.css for basic look and feel */
+  /* Specific overrides for vote buttons: */
+  background-color: transparent;
+  color: var(--secondary-color); /* Default color for vote arrows */
+  border: 1px solid var(--border-color);
+  padding: 0.25rem 0.5rem; /* Smaller padding for compact vote buttons */
+  font-size: 1rem; /* Adjust if icons are text or actual icons */
+  line-height: 1; /* Ensure tight fit for arrow characters */
+  min-width: 30px; /* Ensure buttons have some width */
+}
+
+.voteButton:hover {
+  background-color: #e9ecef; /* Light hover for non-active buttons */
+  color: var(--primary-color); /* Change arrow color on hover */
+}
+
+/* 
+  If we had userVote state (e.g., 'upvoted', 'downvoted', null)
+  .upvoted { color: orange; }
+  .downvoted { color: var(--primary-color); }
+*/
+
+.score {
+  font-weight: bold;
+  font-size: 1rem;
+  color: var(--text-color);
+  min-width: 20px; /* Space for score display */
+  text-align: center;
+}
+
+.voteError {
+  /* Uses .error-message from main.css for text color and font-size */
+  margin-left: 0.5rem; /* Space it from the voting controls */
+}

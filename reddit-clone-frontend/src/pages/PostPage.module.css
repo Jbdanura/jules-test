@@ -1,0 +1,98 @@
+/* PostPage.module.css */
+
+.postPageContainer {
+  max-width: 800px; /* Or your preferred width for a single post */
+  margin: 1rem auto; /* Center the page content with some margin */
+  padding: 1rem;
+}
+
+.postContentCard {
+  /* .card class from main.css provides base */
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.postTitle {
+  margin-top: 0;
+  font-size: 2rem; /* Larger title for the main post */
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+}
+
+.postMeta {
+  font-size: 0.9rem;
+  color: var(--secondary-color);
+  margin-bottom: 1rem;
+  display: flex; /* For alignment if needed */
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.postMeta a {
+  color: var(--secondary-color);
+  text-decoration: underline;
+}
+
+.postMeta a:hover {
+  color: var(--primary-color);
+}
+
+.postBody {
+  font-size: 1rem;
+  line-height: 1.7; /* Improved readability for post content */
+  color: var(--text-color);
+  white-space: pre-wrap; /* Respect newlines and spaces */
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.postVote {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color); /* Separator for vote section */
+}
+
+.commentsSection {
+  margin-top: 2rem;
+}
+
+.commentsHeading {
+  font-size: 1.5rem;
+  color: var(--text-color);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.commentForm {
+  /* .card class from main.css provides base */
+  padding: 1rem;
+  margin-bottom: 2rem;
+}
+
+.commentForm textarea {
+  /* Uses global form styles from main.css */
+  min-height: 80px;
+  margin-bottom: 0.5rem;
+}
+
+.commentForm button {
+  /* Uses global button styles from main.css */
+  /* Add margin if not covered by global utility classes like .mt-2 */
+}
+
+.loginPrompt {
+  padding: 1rem;
+  background-color: var(--container-bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 0.25rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.commentsList {
+  list-style: none;
+  padding: 0;
+}
+
+/* Styles for CommentItem will be in CommentItem.module.css or applied directly if simple */

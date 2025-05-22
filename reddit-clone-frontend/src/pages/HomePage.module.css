@@ -1,0 +1,81 @@
+/* HomePage.module.css */
+
+.homePageLayout {
+  display: flex;
+  flex-wrap: wrap; /* Allow sidebar to wrap on smaller screens */
+  gap: 1.5rem; /* Space between main content and sidebar */
+  padding: 1rem; /* Padding around the whole page layout */
+}
+
+.mainContent {
+  flex: 3; /* Main content takes more space */
+  min-width: 300px; /* Ensure main content doesn't get too squished */
+}
+
+.sidebar {
+  flex: 1;
+  min-width: 250px; /* Ensure sidebar has some width */
+  /* background-color: var(--container-bg-color); Optional: if sidebar needs a distinct background */
+  /* padding: 1rem; Optional: if sidebar needs internal padding */
+  /* border-left: 1px solid var(--border-color); Optional: if a border is desired */
+}
+
+.postList {
+  list-style: none;
+  padding: 0;
+}
+
+.postItem {
+  /* .card class from main.css will provide base styling */
+  /* Additional post-specific styling can go here if needed */
+  margin-bottom: 1.5rem; /* More spacing between posts */
+}
+
+.postTitle {
+  margin-top: 0; /* Remove default heading margin if inside card */
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem; /* Slightly larger title for posts */
+}
+
+.postTitle a {
+  text-decoration: none;
+  color: var(--text-color); /* Use default text color or a specific link color */
+}
+
+.postTitle a:hover {
+  color: var(--primary-color); /* Link hover color */
+}
+
+.postMeta {
+  font-size: 0.85rem;
+  color: var(--secondary-color); /* Gray for meta text */
+  margin-bottom: 0.75rem;
+  display: block; /* Make it a block to take its own line or for margin */
+}
+
+.postMeta a {
+  color: var(--secondary-color);
+  text-decoration: underline;
+}
+
+.postMeta a:hover {
+  color: var(--primary-color);
+}
+
+.postVote {
+  margin-top: 0.75rem;
+}
+
+/* Responsive adjustments for HomePage layout */
+@media (max-width: 768px) {
+  .homePageLayout {
+    flex-direction: column; /* Stack main content and sidebar */
+  }
+
+  .mainContent,
+  .sidebar {
+    flex-basis: 100%; /* Both take full width when stacked */
+    min-width: unset; /* Reset min-width */
+    border-left: none; /* Remove sidebar border if it was added */
+  }
+}

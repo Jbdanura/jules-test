@@ -1,13 +1,208 @@
-body { 
-  margin: 0; 
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 
-               'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', 
-               sans-serif; 
+/* Simple CSS Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%; /* Prevent adjustments of font size after orientation changes in iOS. */
+  -moz-tab-size: 4; /* Consistent tab size */
+  tab-size: 4; /* Consistent tab size */
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333; /* Dark Gray Text */
+  background-color: #f8f9fa; /* Light Gray Background */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* Global Variables (Optional, but good for consistency) */
+:root {
+  --primary-color: #007bff; /* Blue */
+  --secondary-color: #6c757d; /* Gray */
+  --accent-color: #17a2b8; /* Teal */
+  --text-color: #333;
+  --background-color: #f8f9fa;
+  --container-bg-color: #fff; /* White for cards, etc. */
+  --border-color: #dee2e6; /* Light Gray Border */
+  --link-color: #007bff;
+  --link-hover-color: #0056b3;
+  --button-bg-color: var(--primary-color);
+  --button-text-color: #fff;
+  --button-hover-bg-color: #0056b3;
+  --input-border-color: #ced4da;
+  --input-focus-border-color: #80bdff;
+  --error-color: #dc3545; /* Red for errors */
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text-color);
+}
+
+h1 { font-size: 2.25rem; }
+h2 { font-size: 1.8rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.2rem; }
+h5 { font-size: 1rem; }
+h6 { font-size: 0.9rem; }
+
+p {
+  margin-bottom: 1rem;
+}
+
+/* Links */
+a {
+  color: var(--link-color);
+  text-decoration: none;
+  background-color: transparent;
+}
+
+a:hover {
+  color: var(--link-hover-color);
+  text-decoration: underline;
+}
+
+/* Code blocks (if any, from markdown perhaps) */
+code, pre {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  font-size: 0.875em;
+}
+
+pre {
+  padding: 1rem;
+  overflow: auto;
+  background-color: #e9ecef;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+/* Basic container for consistent padding */
+.container {
+  width: 90%;
+  max-width: 1200px; /* Max width for larger screens */
+  margin-left: auto;
+  margin-right: auto;
+  padding: 20px;
+}
+
+/* General Form Styling */
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid var(--input-border-color);
+  border-radius: 0.25rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--input-focus-border-color);
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+textarea {
+  resize: vertical;
+}
+
+button,
+input[type="submit"] { /* This might not be used if all buttons are <button> */
+  display: inline-block;
+  font-weight: 400;
+  color: var(--button-text-color);
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  background-color: var(--button-bg-color);
+  border: 1px solid var(--button-bg-color);
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: 0.25rem;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+button:hover,
+input[type="submit"]:hover {
+  background-color: var(--button-hover-bg-color);
+  border-color: var(--button-hover-bg-color);
+  text-decoration: none;
+}
+
+button:focus,
+input[type="submit"]:focus {
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.5);
+}
+
+button:disabled,
+input[type="submit"]:disabled {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Error messages */
+.error-message {
+  color: var(--error-color);
+  font-size: 0.9em;
+  margin-top: 0.25rem;
+}
+
+/* Success messages */
+.success-message {
+  color: #28a745; /* Green for success */
+  font-size: 0.9em;
+  margin-top: 0.25rem;
+}
+
+/* Utility classes */
+.text-center {
+  text-align: center;
+}
+.mb-1 { margin-bottom: 0.25rem !important; }
+.mb-2 { margin-bottom: 0.5rem !important; }
+.mb-3 { margin-bottom: 1rem !important; }
+.mt-1 { margin-top: 0.25rem !important; }
+.mt-2 { margin-top: 0.5rem !important; }
+.mt-3 { margin-top: 1rem !important; }
+
+/* Card-like styling for posts and other containers */
+.card {
+  background-color: var(--container-bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 0.3rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }

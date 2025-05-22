@@ -1,0 +1,36 @@
+/* CommentItem.module.css */
+
+.commentItem {
+  /* Using .card class from main.css will provide some base like border, bg, padding */
+  /* This class is for additional comment-specific styling */
+  margin-bottom: 1rem;
+  padding: 1rem; /* Override default card padding if needed or add more */
+  border-radius: 0.25rem; /* Ensure consistent border-radius */
+  background-color: var(--container-bg-color);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+.commentContent {
+  white-space: pre-wrap;
+  margin: 0 0 0.75rem 0; /* Space below content before meta */
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.commentMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--secondary-color);
+}
+
+.commentAuthorDate {
+  /* Styles for author and date if needed */
+}
+
+.commentVote {
+  /* Styles for the vote component container within a comment if needed */
+  /* For example, to align it differently or add specific margins */
+}
