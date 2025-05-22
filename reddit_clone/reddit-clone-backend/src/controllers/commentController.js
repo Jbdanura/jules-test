@@ -3,14 +3,15 @@ const Comment = db.Comment;
 const Post = db.Post;
 const User = db.User;
 
-// Add a comment to a post
-exports.addComment = async (req, res) => {
+// Create a new comment on a post
+exports.createComment = async (req, res) => {
     try {
-        const { content, postId } = req.body;
+        const { content } = req.body;
+        const { postId } = req.params; // postId from route parameters
         const userId = req.user.id; // From authMiddleware
 
-        if (!content || !postId) {
-            return res.status(400).json({ message: 'Content and postId are required.' });
+        if (!content || content.trim() === "") { // Validate content
+            return res.status(400).json({ message: 'Comment content cannot be empty.' });
         }
 
         // Verify post exists
@@ -30,10 +31,10 @@ exports.addComment = async (req, res) => {
             include: [{ model: User, as: 'author', attributes: ['id', 'username'] }]
         });
 
-        res.status(201).json({ message: 'Comment added successfully!', comment: commentWithAuthor });
+        res.status(201).json({ message: 'Comment created successfully!', comment: commentWithAuthor });
     } catch (error) {
-        console.error("Add comment error:", error);
-        res.status(500).json({ message: 'Error adding comment', error: error.message });
+        console.error("Create comment error:", error); // Updated error log message
+        res.status(500).json({ message: 'Error creating comment', error: error.message }); // Updated error response
     }
 };
 

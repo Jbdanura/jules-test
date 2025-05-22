@@ -26,12 +26,28 @@ const Vote = ({ entityId, entityType, initialScore }) => {
     }
     setScore(optimisticScore);
 
+    // Map frontend voteType to backend expected type
+    let apiVoteType;
+    if (voteType === 'upvote') {
+      apiVoteType = 'like';
+    } else if (voteType === 'downvote') {
+      apiVoteType = 'dislike';
+    } else {
+      console.error('Unexpected voteType:', voteType);
+      // Optionally revert optimistic update or setError
+      setScore(initialScore); // Revert optimistic update
+      setError('Invalid vote type specified.');
+      return;
+    }
+
+    const voteData = { type: apiVoteType };
+
     try {
       let response;
       if (entityType === 'post') {
-        response = await votePost(entityId, { voteType });
+        response = await votePost(entityId, voteData);
       } else if (entityType === 'comment') {
-        response = await voteComment(entityId, { voteType });
+        response = await voteComment(entityId, voteData);
       } else {
         throw new Error('Invalid entity type for voting.');
       }

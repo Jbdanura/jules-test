@@ -129,3 +129,49 @@
     margin-bottom: 0; /* No margin for the last element */
   }
 }
+
+/* Styles for Post Actions (Edit/Delete buttons) in HomePage */
+.postActions {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color-extralight);
+  display: flex;
+  gap: 0.5rem; /* Space between buttons */
+  align-items: center;
+}
+
+.actionButton {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+  text-decoration: none;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  background-color: var(--button-bg-color, #f0f0f0); /* Fallback if var not defined */
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.actionButton:hover {
+  background-color: var(--button-hover-bg-color, #e0e0e0);
+  border-color: var(--border-color-strong, #ccc);
+}
+
+.deleteButton {
+  color: var(--danger-color);
+  border-color: var(--danger-color-light, #ffdddd);
+  background-color: transparent; /* Or a very light danger background */
+}
+
+.deleteButton:hover {
+  color: #fff;
+  background-color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+
+.actionGlobalError { /* For errors displayed at the bottom of the post list */
+  margin-top: 1rem;
+  text-align: center;
+  padding: 0.5rem;
+  /* Uses .error-message from main.css for color, etc. */
+}

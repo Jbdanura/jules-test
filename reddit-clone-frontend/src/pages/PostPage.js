@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom'; // Added useLocation
-import { getPostById, getCommentsByPostId, createComment as apiCreateComment } from '../services/api';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom'; // Added useNavigate
+import { getPostById, getCommentsByPostId, createComment as apiCreateComment, deletePost as apiDeletePost } from '../services/api'; // Added deletePost
 import { useAuth } from '../contexts/AuthContext';
 import CommentItem from '../components/CommentItem';
 import Vote from '../components/Vote';
@@ -10,6 +10,7 @@ const PostPage = () => {
   const { postId } = useParams();
   const { isAuthenticated, user } = useAuth();
   const location = useLocation(); // For login redirect state
+  const navigate = useNavigate(); // For navigation after delete
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [loadingPost, setLoadingPost] = useState(true);
@@ -19,6 +20,7 @@ const PostPage = () => {
   const [newCommentText, setNewCommentText] = useState(''); // State for new comment text
   const [submittingComment, setSubmittingComment] = useState(false); // State for comment submission
   const [errorSubmitComment, setErrorSubmitComment] = useState(null); // State for comment submission error
+  const [errorAction, setErrorAction] = useState(null); // State for general actions like delete/edit errors
 
   // Helper to format date
   const formatDate = (dateString) => {
@@ -81,17 +83,36 @@ const PostPage = () => {
     setErrorSubmitComment(null);
 
     try {
-      const commentData = { content: newCommentText, post: postId }; // API expects 'post' not 'postId'
-      const response = await apiCreateComment(commentData);
-      // Add new comment to the top of the list for immediate UI update
-      // The backend should return the full comment object including author details populated
-      setComments(prevComments => [response.data, ...prevComments]);
+      // Call apiCreateComment with postId as the first argument
+      const response = await apiCreateComment(postId, { content: newCommentText });
+      // Add new comment (from response.data.comment) to the top of the list
+      if (response.data && response.data.comment) {
+        setComments(prevComments => [response.data.comment, ...prevComments]);
+      } else {
+        // If the structure is different, log and consider refetching or handling error
+        console.warn("New comment structure from API is not as expected:", response.data);
+        // Optionally, refetch comments here as a fallback if optimistic update fails
+        // fetchComments(); // Assuming fetchComments is the function name
+      }
       setNewCommentText(''); // Clear textarea
     } catch (err) {
       setErrorSubmitComment(err.response?.data?.message || err.message || "Failed to submit comment.");
       console.error("Submit comment error:", err);
     } finally {
       setSubmittingComment(false);
+    }
+  };
+
+  const handleDeletePost = async () => {
+    if (window.confirm('Are you sure you want to delete this post?')) {
+      try {
+        setErrorAction(null);
+        await apiDeletePost(postId);
+        navigate('/'); // Navigate to homepage after successful deletion
+      } catch (err) {
+        console.error("Delete post error:", err);
+        setErrorAction(err.response?.data?.message || err.message || "Failed to delete post.");
+      }
     }
   };
   
@@ -133,6 +154,13 @@ const PostPage = () => {
             initialScore={post.score !== undefined ? post.score : (post.upvotes - post.downvotes) || 0} 
           />
         </div>
+        {isAuthenticated && user && (post.author?._id === user._id || post.author?.id === user.id) && (
+          <div className={styles.postActions}>
+            <Link to={`/edit-post/${postId}`} className={styles.actionButton}>Edit Post</Link>
+            <button onClick={handleDeletePost} className={`${styles.actionButton} ${styles.deleteButton}`}>Delete Post</button>
+          </div>
+        )}
+        {errorAction && <p className={`error-message ${styles.actionError}`}>{errorAction}</p>}
       </div>
       
       <div className={styles.commentsSection}>

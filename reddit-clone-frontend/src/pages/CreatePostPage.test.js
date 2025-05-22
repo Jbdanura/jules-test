@@ -51,15 +51,18 @@ describe('CreatePostPage Component', () => {
     api.createPost.mockClear();
   });
 
-  test('successfully creates a post with communityId and navigates', async () => {
+  test('successfully creates a post with communityId, displays correct success message, and navigates', async () => {
     api.getAllCommunities.mockResolvedValueOnce({ data: mockCommunities });
-    api.createPost.mockResolvedValueOnce({ 
-      data: { 
-        _id: 'post123', 
-        id: 'post123', 
-        title: 'Test Post Title', 
-        communityId: 'comm1' 
-      } 
+    // Adjusted mock response to match { data: { post: { ... } } } structure
+    api.createPost.mockResolvedValueOnce({
+      data: {
+        post: { // Nested post object
+          _id: 'post123',
+          id: 'post123', // Ensure id is also present if component uses it as fallback
+          title: 'Test Post Title From Post Object', // Specific title to check
+          communityId: 'comm1'
+        }
+      }
     });
 
     renderWithRouterAndAuth(<CreatePostPage />, { providerProps: authenticatedUserProps });
@@ -92,14 +95,13 @@ describe('CreatePostPage Component', () => {
       communityId: 'comm1', // Crucial: Check for communityId
     });
 
-    // Check for success message
+    // Check for success message using the specific title from the nested post object
     await waitFor(() => {
-        expect(screen.getByText(/Post "Test Post Title" created successfully!/i)).toBeInTheDocument();
+        expect(screen.getByText(/Post "Test Post Title From Post Object" created successfully!/i)).toBeInTheDocument();
     });
 
-    // Check for navigation (mocked navigate)
+    // Check for navigation (mocked navigate using ID from nested post object)
     await waitFor(() => {
-        // Example: navigate to the new post page
         expect(mockNavigate).toHaveBeenCalledWith('/post/post123'); 
     }, { timeout: 2000 }); // Increased timeout for the setTimeout in component
   });

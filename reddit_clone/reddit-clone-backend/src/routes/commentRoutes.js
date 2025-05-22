@@ -3,8 +3,8 @@ const router = express.Router();
 const commentController = require('../controllers/commentController');
 const { protect } = require('../middlewares/authMiddleware');
 
-// POST /api/comments - Add a new comment to a post (protected)
-router.post('/', protect, commentController.addComment);
+// POST /api/comments/post/:postId - Create a new comment on a post (protected)
+router.post('/post/:postId', protect, commentController.createComment); // Changed route and controller method name
 
 // GET /api/comments/post/:postId - Get all comments for a specific post (public)
 router.get('/post/:postId', commentController.getCommentsByPost);

@@ -62,13 +62,18 @@ const CreatePostPage = () => {
     try {
       const postData = { title, content, communityId: communityId }; // API expects 'communityId' field with ID
       const response = await apiCreatePost(postData);
-      setSuccess(`Post "${response.data.title}" created successfully!`);
       
-      const newPostId = response.data._id || response.data.id;
+      // Correctly access title and use optional chaining
+      const postTitle = response.data?.post?.title || 'New Post'; // Default to 'New Post' if title not found
+      setSuccess(`Post "${postTitle}" created successfully!`);
+      
+      // Prioritize ID from the nested post object, then fall back to original direct access on response.data
+      const newPostId = response.data?.post?._id || response.data?.post?.id || response.data?._id || response.data?.id;
+      
       if (newPostId) {
         setTimeout(() => navigate(`/post/${newPostId}`), 1500);
       } else {
-        // Fallback if ID is not in response, redirect to community page
+        // Fallback if no ID is found anywhere, redirect to the community page as a last resort
         setTimeout(() => navigate(`/community/${communityId}`), 1500);
       }
     } catch (err) {

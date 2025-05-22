@@ -31,6 +31,9 @@ export const getAllPosts = () => api.get('/posts');
 export const getPostsByCommunity = (communityIdentifier) => api.get(`/posts/community/${communityIdentifier}`);
 export const getPostById = (postId) => api.get(`/posts/${postId}`);
 export const createPost = (postData) => api.post('/posts', postData);
+export const getPostsByAuthorId = (userId) => api.get(`/posts/author/${userId}`);
+export const updatePost = (postId, postData) => api.put(`/posts/${postId}`, postData); // Added updatePost
+export const deletePost = (postId) => api.delete(`/posts/${postId}`); // Added deletePost
 
 // Communities
 export const getAllCommunities = () => api.get('/communities');
@@ -39,7 +42,8 @@ export const createCommunity = (communityData) => api.post('/communities', commu
 
 // Comments
 export const getCommentsByPostId = (postId) => api.get(`/comments/post/${postId}`);
-export const createComment = (commentData) => api.post('/comments', commentData);
+// Modified createComment to take postId as a separate parameter and use the correct route
+export const createComment = (postId, commentData) => api.post(`/comments/post/${postId}`, commentData);
 
 // Votes
 export const votePost = (postId, voteData) => api.post(`/votes/post/${postId}`, voteData);

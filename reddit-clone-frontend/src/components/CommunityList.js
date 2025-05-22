@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllCommunities } from '../services/api';
+import styles from './CommunityList.module.css'; // Import CSS module
 
 const CommunityList = () => {
   const [communities, setCommunities] = useState([]);
@@ -37,17 +38,19 @@ const CommunityList = () => {
     return <p>No communities found.</p>;
   }
 
+  // Apply styles to the main container, heading, list, list items, and links
   return (
-    <div>
-      <h3>Communities</h3>
-      <ul>
+    <div className={styles.communityListContainer}>
+      <h3 className={styles.listHeading}>Communities</h3>
+      <ul className={styles.list}>
         {communities.map((community) => (
-          <li key={community._id || community.id}>
-            {/* Assuming community object has _id or id, and name. 
-                Backend uses 'name' for display and potentially 'id' or '_id' as primary key.
-                The route is /community/:communityId. We'll use community._id or community.id for the link.
-            */}
-            <Link to={`/community/${community._id || community.id}`}>{community.name}</Link>
+          <li key={community._id || community.id} className={styles.listItem}>
+            <Link 
+              to={`/community/${community._id || community.id}`} 
+              className={styles.link}
+            >
+              {community.name}
+            </Link>
           </li>
         ))}
       </ul>

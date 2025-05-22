@@ -14,7 +14,8 @@ import UserProfilePage from './pages/UserProfilePage';
 import NotFoundPage from './pages/NotFoundPage';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
-import CreateCommunityPage from './pages/CreateCommunityPage'; // Import CreateCommunityPage
+import CreateCommunityPage from './pages/CreateCommunityPage';
+import EditPostPage from './pages/EditPostPage'; // Import EditPostPage
 // Removed placeholder LoginPage and RegisterPage
 const DashboardPage = () => { const { user } = useAuth(); return <div>Dashboard - Welcome {user?.username}</div>; };
 
@@ -36,7 +37,8 @@ function App() {
             <Route path="/submit" element={<CreatePostPage />} />
             <Route path="/profile/:userId" element={<UserProfilePage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/create-community" element={<CreateCommunityPage />} /> 
+            <Route path="/create-community" element={<CreateCommunityPage />} />
+            <Route path="/edit-post/:postId" element={<EditPostPage />} /> {/* Added EditPostPage route */}
           </Route>
           
           {/* Not Found Route */}

@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext'; // Import useAuth
+import { useAuth } from '../contexts/AuthContext';
 import CommunityList from '../components/CommunityList';
-import { getAllPosts } from '../services/api';
+import { getAllPosts, deletePost as apiDeletePost } from '../services/api'; // Added deletePost
 import Vote from '../components/Vote';
-import styles from './HomePage.module.css'; // Import CSS module for HomePage
+import styles from './HomePage.module.css';
 
 const HomePage = () => {
-  const { isAuthenticated } = useAuth(); // Get auth status
+  const { isAuthenticated, user } = useAuth(); // Get user for ownership check
   const [posts, setPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [errorPosts, setErrorPosts] = useState(null);
+  const [actionError, setActionError] = useState(null); // For delete errors
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -29,6 +30,21 @@ const HomePage = () => {
 
     fetchPosts();
   }, []);
+
+  const handleDeletePost = async (postIdToDelete) => {
+    if (window.confirm('Are you sure you want to delete this post?')) {
+      try {
+        setActionError(null);
+        await apiDeletePost(postIdToDelete);
+        setPosts(prevPosts => prevPosts.filter(p => (p._id || p.id) !== postIdToDelete));
+      } catch (err) {
+        console.error("Delete post error on homepage:", err);
+        setActionError(err.response?.data?.message || err.message || "Failed to delete post.");
+        // Clear error after some time
+        setTimeout(() => setActionError(null), 3000);
+      }
+    }
+  };
 
   return (
     <div className={styles.homePageLayout}>
@@ -76,10 +92,17 @@ const HomePage = () => {
                     initialScore={post.score !== undefined ? post.score : (post.upvotes - post.downvotes) || 0} 
                   />
                 </div>
+                {isAuthenticated && user && (post.author?._id === user._id || post.author?.id === user.id) && (
+                  <div className={styles.postActions}> {/* Add a class for styling */}
+                    <Link to={`/edit-post/${post._id || post.id}`} className={styles.actionButton}>Edit</Link>
+                    <button onClick={() => handleDeletePost(post._id || post.id)} className={`${styles.actionButton} ${styles.deleteButton}`}>Delete</button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
         )}
+        {actionError && <p className={`error-message ${styles.actionGlobalError}`}>{actionError}</p>}
       </main>
       
       <aside className={styles.sidebar}>

@@ -1,0 +1,64 @@
+/* CommunityList.module.css */
+.communityListContainer {
+  /* No specific styles needed if parent (sidebar) already provides card styling */
+  /* Add padding here if sidebar doesn't have enough internal padding */
+}
+
+.listHeading {
+  font-size: 1.1rem; /* Slightly smaller than h2, good for a card heading */
+  font-weight: 600;
+  color: var(--text-color-strong);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color-light);
+  /* text-align: center; */ /* Optional: if desired */
+}
+
+.list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.listItem {
+  padding: 0; /* Padding will be on the link for full-width clickability */
+  border-bottom: 1px solid var(--border-color-extralight); /* Lighter border */
+  transition: background-color 0.15s ease-in-out;
+}
+
+.listItem:last-child {
+  border-bottom: none;
+}
+
+/* Hover effect directly on listItem can be tricky if link also has one.
+   Applying hover to link is often cleaner if link is display:block and fills item.
+   If listItem hover is desired, ensure link background is transparent. */
+.listItem:hover {
+  /* background-color: var(--background-color-hover-light); */
+  /* Ensure this doesn't conflict with link hover if link covers everything */
+}
+
+.link {
+  display: block;
+  padding: 0.75rem 0.5rem; /* Padding for the clickable area */
+  text-decoration: none;
+  color: var(--text-color);
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+  border-radius: var(--border-radius-sm); /* Slight rounding for link area */
+}
+
+.link:hover {
+  color: var(--primary-color);
+  background-color: var(--primary-color-extralight); /* Subtle background on link hover */
+  /* text-decoration: underline; */ /* Optional */
+}
+
+/* If you want a full background hover on the item that also changes link color */
+/*
+.listItem:hover .link {
+  color: var(--primary-color);
+}
+.listItem:hover {
+  background-color: var(--primary-color-extralight);
+}
+*/
