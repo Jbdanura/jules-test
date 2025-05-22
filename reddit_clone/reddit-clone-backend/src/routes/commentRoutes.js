@@ -9,4 +9,7 @@ router.post('/post/:postId', protect, commentController.createComment); // Chang
 // GET /api/comments/post/:postId - Get all comments for a specific post (public)
 router.get('/post/:postId', commentController.getCommentsByPost);
 
+// GET /api/comments/user/:userId - Get all comments by a specific user (public)
+router.get('/user/:userId', commentController.getCommentsByUserId);
+
 module.exports = router;

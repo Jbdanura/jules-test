@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { getPostsByAuthorId, deletePost as apiDeletePost } from '../services/api'; // Added deletePost
+import { getPostsByAuthorId, deletePost as apiDeletePost, getCommentsByUserId } from '../services/api'; // Added getCommentsByUserId
 import Vote from '../components/Vote';
 
 const UserProfilePage = () => {
@@ -12,6 +12,10 @@ const UserProfilePage = () => {
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [errorPosts, setErrorPosts] = useState(null);
   const [actionError, setActionError] = useState(null); // For delete errors
+
+  const [userComments, setUserComments] = useState([]);
+  const [loadingUserComments, setLoadingUserComments] = useState(false);
+  const [errorUserComments, setErrorUserComments] = useState(null);
 
   // Determine which user's profile to display (currently, only logged-in user)
   // In future, if backend supports fetching other user's profiles, this logic would change.
@@ -45,6 +49,33 @@ const UserProfilePage = () => {
       setUserPosts([]);
     }
   }, [isAuthenticated, displayUser]);
+
+  useEffect(() => {
+    const fetchUserComments = async () => {
+      if (!displayUser || !(displayUser._id || displayUser.id)) {
+        setUserComments([]);
+        return;
+      }
+      setLoadingUserComments(true);
+      setErrorUserComments(null);
+      try {
+        const userId = displayUser._id || displayUser.id;
+        const response = await getCommentsByUserId(userId);
+        setUserComments(response.data);
+      } catch (err) {
+        console.error("Error fetching user comments:", err);
+        setErrorUserComments(err.response?.data?.message || err.message || 'Failed to fetch comments.');
+      } finally {
+        setLoadingUserComments(false);
+      }
+    };
+
+    if (isAuthenticated && displayUser) { // Fetch comments if user is authenticated and displayUser is set
+        fetchUserComments();
+    } else {
+        setUserComments([]); // Clear comments if not authenticated or no displayUser
+    }
+  }, [isAuthenticated, displayUser]); // Re-run if displayUser changes
 
   if (!isAuthenticated || !displayUser) {
     // This page is protected, so AuthContext and ProtectedRoute should handle redirection.
@@ -130,12 +161,26 @@ const UserProfilePage = () => {
         {actionError && <p style={{ color: 'red', textAlign: 'center', marginTop: '10px' }}>{actionError}</p>}
       </section>
 
-      <section>
+      <section style={{ marginTop: '30px' }}>
         <h2>My Comments</h2>
-        <p>
-          <em>Displaying your comments is not yet supported. This feature requires backend updates.</em>
-        </p>
-        {/* Placeholder for user's comments - requires backend support */}
+        {loadingUserComments && <p>Loading comments...</p>}
+        {errorUserComments && <p style={{ color: 'red' }}>Error loading comments: {errorUserComments}</p>}
+        {!loadingUserComments && !errorUserComments && userComments.length === 0 && (
+          <p>You haven't made any comments yet.</p>
+        )}
+        {!loadingUserComments && !errorUserComments && userComments.length > 0 && (
+          <ul style={{ listStyle: 'none', padding: 0 }}>
+            {userComments.map(comment => (
+              <li key={comment._id || comment.id} style={{ border: '1px solid #ddd', padding: '10px', marginBottom: '10px', borderRadius: '4px' }}>
+                <p>"{comment.content}"</p> {/* Quoted content */}
+                <small>
+                  On post: <Link to={`/post/${comment.post?._id || comment.post?.id}`}>{comment.post?.title || 'Go to post'}</Link>
+                  {' - '} {formatDate(comment.createdAt)} {/* Use existing formatDate */}
+                </small>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );

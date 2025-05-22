@@ -1,0 +1,122 @@
+/* UserConfigPage.module.css */
+
+.configContainer {
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 1rem;
+  background-color: var(--container-bg-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+}
+
+.configContainer h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--text-color-strong);
+}
+
+.configContainer p { /* For username/email display */
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-size: 0.95rem;
+}
+.configContainer p strong {
+    color: var(--text-color-strong);
+}
+
+
+.configSection {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color-light);
+}
+
+.configSection h3 {
+  margin-bottom: 1rem;
+  color: var(--text-color-strong);
+  font-size: 1.2rem;
+}
+
+.bioTextarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-size: 1rem;
+  background-color: var(--input-bg-color);
+  color: var(--input-text-color);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  min-height: 80px; /* Good default height for bio */
+  margin-bottom: 1rem; /* Space before error/success messages or button */
+}
+
+.formControl { /* General style for input fields */
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-size: 1rem;
+  background-color: var(--input-bg-color);
+  color: var(--input-text-color);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.formControl:focus, /* Combined focus style */
+.bioTextarea:focus {
+  border-color: var(--primary-color);
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb), 0.25);
+}
+
+.submitButton {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #fff;
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.submitButton:hover {
+  background-color: var(--link-hover-color);
+}
+
+.errorMessage,
+.successMessage {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border-radius: var(--border-radius-sm);
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.errorMessage {
+  color: var(--danger-color-dark, #721c24); /* Fallback if var not defined */
+  background-color: var(--danger-color-light, #f8d7da);
+  border: 1px solid var(--danger-color, #f5c6cb);
+}
+.formSpecificError { /* For errors directly under form fields */
+    margin-top: -0.5rem; /* Pull it closer to the field */
+    margin-bottom: 1rem;
+    text-align: left;
+    padding: 0.3rem 0;
+    background-color: transparent;
+    border: none;
+    font-size: 0.85rem;
+}
+
+
+.successMessage {
+  color: var(--success-color-dark, #155724);
+  background-color: var(--success-color-light, #d4edda);
+  border: 1px solid var(--success-color, #c3e6cb);
+}
+
+.pageError { /* For general page load errors */
+    text-align: center;
+    padding: 1rem;
+}

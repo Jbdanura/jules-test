@@ -21,6 +21,10 @@ module.exports = (sequelize, DataTypes) => {
     password: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    bio: { // Added bio field
+      type: DataTypes.TEXT,
+      allowNull: true,
     }
   }, {
     sequelize,

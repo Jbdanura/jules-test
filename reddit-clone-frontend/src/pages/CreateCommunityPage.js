@@ -30,13 +30,17 @@ const CreateCommunityPage = () => {
     try {
       const communityData = { name, description };
       const response = await apiCreateCommunity(communityData);
-      setSuccess(`Community "${response.data.name}" created successfully!`);
-      // Redirect to the new community's page, assuming response.data contains id or _id
-      const communityId = response.data._id || response.data.id;
+
+      // Adjust to access nested community object, with fallbacks
+      const communityName = response.data?.community?.name || response.data?.name || 'New Community';
+      setSuccess(`Community "${communityName}" created successfully!`);
+      
+      const communityId = response.data?.community?._id || response.data?.community?.id || response.data?._id || response.data?.id;
       if (communityId) {
         setTimeout(() => navigate(`/community/${communityId}`), 2000);
       } else {
-        // Fallback if ID is not in response, though it should be
+        // Fallback if ID is not in response
+        console.warn("No community ID found in response, navigating to home.");
         setTimeout(() => navigate('/'), 2000); 
       }
     } catch (err) {

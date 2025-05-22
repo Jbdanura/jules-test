@@ -43,23 +43,52 @@ module.exports = (sequelize, DataTypes) => {
 
   // Hooks to update Comment's likeCount and dislikeCount
   CommentLike.afterSave(async (like, options) => {
-    const comment = await like.getComment(); // Assumes getComment method from association
-    if (comment) {
-        const likes = await CommentLike.count({ where: { commentId: comment.id, type: 'like' } });
-        const dislikes = await CommentLike.count({ where: { commentId: comment.id, type: 'dislike' } });
+    console.log('CommentLike.afterSave hook fired for like ID:', like.id, 'Type:', like.type, 'CommentID:', like.commentId, 'UserID:', like.userId);
+    console.log('Options:', JSON.stringify(options, null, 2));
+    try {
+      const comment = await like.getComment({ transaction: options.transaction }); // Pass transaction
+      if (comment) {
+        console.log('Found comment ID:', comment.id, 'Current likeCount:', comment.likeCount, 'dislikeCount:', comment.dislikeCount);
+        const likes = await CommentLike.count({ where: { commentId: comment.id, type: 'like' }, transaction: options.transaction });
+        const dislikes = await CommentLike.count({ where: { commentId: comment.id, type: 'dislike' }, transaction: options.transaction });
+        console.log('Calculated likes:', likes, 'dislikes:', dislikes, 'for comment ID:', comment.id);
         await comment.update({ likeCount: likes, dislikeCount: dislikes }, { transaction: options.transaction });
+        await comment.reload({ transaction: options.transaction }); // Reload the comment instance
+        console.log('Successfully updated and reloaded comment ID:', comment.id, 'New counts like:', comment.likeCount, 'dislike:', comment.dislikeCount);
+      } else {
+        console.log('CommentLike.afterSave: Comment not found for like ID:', like.id, 'CommentID from like object:', like.commentId);
+      }
+    } catch (error) {
+      console.error('Error in CommentLike.afterSave hook for like ID:', like.id, error);
     }
   });
 
   CommentLike.afterDestroy(async (like, options) => {
-    const commentId = like.commentId;
-    if (commentId) {
-        const comment = await sequelize.models.Comment.findByPk(commentId, { transaction: options.transaction }); // Access Comment model via sequelize.models
+    console.log('CommentLike.afterDestroy hook fired for like ID:', like.id, 'Type:', like.type, 'CommentID:', like.commentId, 'UserID:', like.userId);
+    console.log('Options:', JSON.stringify(options, null, 2));
+    try {
+      const commentId = like.commentId; // Get commentId from the instance being destroyed
+      if (commentId) {
+        // Access Comment model via sequelize.models or db.Comment if db is defined and passed correctly
+        const CommentModel = sequelize.models.Comment || db.Comment; // Adjust if db is not available
+        const comment = await CommentModel.findByPk(commentId, { transaction: options.transaction });
+        
         if (comment) {
-            const likes = await CommentLike.count({ where: { commentId: commentId, type: 'like' } });
-            const dislikes = await CommentLike.count({ where: { commentId: commentId, type: 'dislike' } });
-            await comment.update({ likeCount: likes, dislikeCount: dislikes }, { transaction: options.transaction });
+          console.log('Found comment ID:', comment.id, 'Current likeCount:', comment.likeCount, 'dislikeCount:', comment.dislikeCount, 'for destroyed like on CommentID:', commentId);
+          const likes = await CommentLike.count({ where: { commentId: commentId, type: 'like' }, transaction: options.transaction });
+          const dislikes = await CommentLike.count({ where: { commentId: commentId, type: 'dislike' }, transaction: options.transaction });
+          console.log('Calculated likes:', likes, 'dislikes:', dislikes, 'for comment ID:', commentId, 'after destroy');
+          await comment.update({ likeCount: likes, dislikeCount: dislikes }, { transaction: options.transaction });
+          await comment.reload({ transaction: options.transaction }); // Reload the comment instance
+          console.log('Successfully updated and reloaded comment ID:', comment.id, 'after destroy. New counts like:', comment.likeCount, 'dislike:', comment.dislikeCount);
+        } else {
+          console.log('CommentLike.afterDestroy: Comment not found for CommentID:', commentId, '(from destroyed like ID:', like.id, ')');
         }
+      } else {
+        console.log('CommentLike.afterDestroy: commentId not found on destroyed like instance ID:', like.id);
+      }
+    } catch (error) {
+      console.error('Error in CommentLike.afterDestroy hook for like ID:', like.id, error);
     }
   });
 

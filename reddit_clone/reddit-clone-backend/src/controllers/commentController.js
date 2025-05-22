@@ -62,3 +62,38 @@ exports.getCommentsByPost = async (req, res) => {
         res.status(500).json({ message: 'Error fetching comments for post', error: error.message });
     }
 };
+
+// Get all comments by a specific user, including the post details
+exports.getCommentsByUserId = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        // Optional: Check if user exists
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        const comments = await Comment.findAll({
+            where: { userId: userId },
+            include: [
+                {
+                    model: User, // Author of the comment (the user themselves)
+                    as: 'author',
+                    attributes: ['id', 'username']
+                },
+                {
+                    model: Post, // The post the comment was made on
+                    as: 'post', // This alias must match the one defined in Comment.associate
+                    attributes: ['id', 'title'] // Include post ID and title
+                }
+            ],
+            order: [['createdAt', 'DESC']]
+        });
+
+        res.status(200).json(comments);
+    } catch (error) {
+        console.error("Get comments by user ID error:", error);
+        res.status(500).json({ message: 'Error fetching comments by user', error: error.message });
+    }
+};

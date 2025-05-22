@@ -44,9 +44,15 @@ export const createCommunity = (communityData) => api.post('/communities', commu
 export const getCommentsByPostId = (postId) => api.get(`/comments/post/${postId}`);
 // Modified createComment to take postId as a separate parameter and use the correct route
 export const createComment = (postId, commentData) => api.post(`/comments/post/${postId}`, commentData);
+export const getCommentsByUserId = (userId) => api.get(`/comments/user/${userId}`); // Added new function
 
 // Votes
 export const votePost = (postId, voteData) => api.post(`/votes/post/${postId}`, voteData);
 export const voteComment = (commentId, voteData) => api.post(`/votes/comment/${commentId}`, voteData);
+
+// User Profile
+export const getUserProfile = () => api.get('/users/profile');
+export const updateUserProfile = (profileData) => api.put('/users/profile', profileData);
+export const changePassword = (passwordData) => api.put('/users/profile/change-password', passwordData); // Added changePassword
 
 export default api;

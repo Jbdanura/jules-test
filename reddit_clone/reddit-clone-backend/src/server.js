@@ -29,6 +29,10 @@ app.use('/api/comments', commentRoutes);
 const voteRoutes = require('./routes/voteRoutes');
 app.use('/api/votes', voteRoutes);
 
+// User Profile routes (Added)
+const userRoutes = require('./routes/userRoutes');
+app.use('/api/users', userRoutes);
+
 app.get('/', (req, res) => {
     res.json({ message: 'Welcome to Reddit Clone backend API.' });
 });
