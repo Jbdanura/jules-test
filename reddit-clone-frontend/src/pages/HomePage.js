@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext'; // Import useAuth
 import CommunityList from '../components/CommunityList';
 import { getAllPosts } from '../services/api';
 import Vote from '../components/Vote';
 import styles from './HomePage.module.css'; // Import CSS module for HomePage
 
 const HomePage = () => {
+  const { isAuthenticated } = useAuth(); // Get auth status
   const [posts, setPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [errorPosts, setErrorPosts] = useState(null);
@@ -31,9 +33,15 @@ const HomePage = () => {
   return (
     <div className={styles.homePageLayout}>
       <main className={styles.mainContent}>
-        <div className="card" style={{ marginBottom: '2rem', padding: '1.5rem' }}> {/* Welcome message card */}
+        <div className={`card ${styles.welcomeCard}`} style={{ marginBottom: '2rem', padding: '1.5rem' }}> {/* Welcome message card with specific style */}
           <h2>Welcome to RedditClone!</h2>
           <p>This is the homepage. Browse posts below or check out the communities on the right.</p>
+          {isAuthenticated && (
+            <div className={styles.createActionsContainer}>
+              <Link to="/submit" className={styles.createButton}>Create Post</Link>
+              <Link to="/create-community" className={styles.createButton}>Create Community</Link>
+            </div>
+          )}
         </div>
         
         <h3>All Posts</h3>

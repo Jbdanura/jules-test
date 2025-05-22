@@ -70,7 +70,6 @@ const UserProfilePage = () => {
       <section style={{ marginBottom: '30px' }}>
         <h2>Profile Information</h2>
         <p><strong>Username:</strong> {displayUser.username}</p>
-        <p><strong>Email:</strong> {displayUser.email}</p>
         {/* Add join date if available in user object, e.g., displayUser.createdAt */}
         {displayUser.createdAt && <p><strong>Joined:</strong> {formatDate(displayUser.createdAt)}</p>}
       </section>

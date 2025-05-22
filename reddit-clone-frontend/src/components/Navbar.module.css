@@ -43,31 +43,76 @@
   text-decoration: none;
 }
 
-.userInfo {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: var(--text-color);
+/* Styles for User Dropdown Menu */
+.userMenuContainer {
+  position: relative; /* For dropdown positioning */
+  display: inline-block; /* Or flex, depending on alignment needs */
 }
 
-.userInfo span {
-  font-weight: 500;
-}
-
-.logoutButton {
-  background-color: var(--accent-color); /* Teal */
+.userMenuButton {
+  background-color: var(--primary-color);
   color: #fff;
   border: none;
   padding: 0.5rem 0.75rem;
-  border-radius: 0.25rem;
+  border-radius: 50%; /* Make it round, adjust as needed */
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 1rem; /* Adjust for icon size or initial letter */
+  width: 40px; /* Fixed width */
+  height: 40px; /* Fixed height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: background-color 0.2s ease-in-out;
 }
 
-.logoutButton:hover {
-  background-color: #138496; /* Darker Teal */
+.userMenuButton:hover {
+  background-color: var(--link-hover-color);
 }
+
+.userDropdown {
+  position: absolute;
+  top: 100%; /* Position below the button */
+  right: 0; /* Align to the right of the button */
+  background-color: var(--container-bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 0.25rem;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 1000; /* Ensure it's above other content */
+  min-width: 180px; /* Minimum width for dropdown items */
+  padding: 0.5rem 0; /* Padding around the list of links */
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdownLink,
+.dropdownButton {
+  display: block;
+  padding: 0.75rem 1rem; /* Increased padding for better touch targets */
+  color: var(--text-color);
+  text-decoration: none;
+  background: none;
+  border: none;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  font-size: 0.95rem; /* Slightly larger font */
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.dropdownLink:hover,
+.dropdownButton:hover {
+  background-color: var(--primary-color-light); /* Lighter primary for hover */
+  color: var(--primary-color);
+}
+
+.dropdownButton {
+  color: var(--danger-color); /* Optional: Make logout more distinct */
+}
+.dropdownButton:hover {
+  color: #fff;
+  background-color: var(--danger-color); /* Optional: Make logout more distinct */
+}
+
 
 /* Basic Responsive: Stack items on smaller screens */
 @media (max-width: 768px) {
@@ -88,15 +133,24 @@
     text-align: left;
   }
 
-  .userInfo {
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    gap: 0.5rem;
+  /* Adjust dropdown for mobile if needed */
+  .userMenuContainer {
+    width: 100%; /* Make button container full width */
   }
-
-  .logoutButton {
-    width: 100%;
-    text-align: center;
+  .userMenuButton {
+    /* Optional: Adjust button style for mobile if needed */
+    /* For example, make it full width or align differently */
+    width: auto; /* Allow it to be wider than a circle if text is long */
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem; /* Standard button shape on mobile */
+  }
+  .userDropdown {
+    /* Ensure dropdown is full width or appropriately positioned on mobile */
+    width: 100%; 
+    left:0; /* Align to left edge if button is full width */
+    right: auto;
+  }
+  .dropdownLink, .dropdownButton {
+    text-align: center; /* Center text for dropdown items on mobile */
   }
 }

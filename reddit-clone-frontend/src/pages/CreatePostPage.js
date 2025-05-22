@@ -60,7 +60,7 @@ const CreatePostPage = () => {
     }
 
     try {
-      const postData = { title, content, community: communityId }; // API expects 'community' field with ID
+      const postData = { title, content, communityId: communityId }; // API expects 'communityId' field with ID
       const response = await apiCreatePost(postData);
       setSuccess(`Post "${response.data.title}" created successfully!`);
       

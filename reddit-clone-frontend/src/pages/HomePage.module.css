@@ -15,10 +15,43 @@
 .sidebar {
   flex: 1;
   min-width: 250px; /* Ensure sidebar has some width */
-  /* background-color: var(--container-bg-color); Optional: if sidebar needs a distinct background */
-  /* padding: 1rem; Optional: if sidebar needs internal padding */
-  /* border-left: 1px solid var(--border-color); Optional: if a border is desired */
+  background-color: var(--container-bg-color); /* Add a background */
+  padding: 1rem; /* Add internal padding */
+  border-radius: var(--border-radius); /* Consistent rounding */
+  box-shadow: var(--card-shadow); /* Consistent shadow if using a variable, or define one */
 }
+
+.welcomeCard {
+  /* Assuming .card class provides base padding, background, border */
+  /* Specific styles for welcome card if needed beyond the base .card */
+  border-left: 4px solid var(--primary-color); /* Example: Accent border */
+}
+
+.createActionsContainer {
+  display: flex;
+  gap: 1rem; /* Space between buttons */
+  margin-top: 1.5rem; /* Space above the buttons, below the welcome text */
+  padding-top: 1rem; /* Optional: if more space needed from text */
+  border-top: 1px solid var(--border-color-light); /* Subtle separator */
+}
+
+.createButton {
+  background-color: var(--primary-color);
+  color: #fff;
+  padding: 0.6rem 1.2rem; /* Adjusted padding */
+  text-decoration: none;
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  text-align: center;
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.createButton:hover {
+  background-color: var(--link-hover-color);
+  color: #fff;
+  transform: translateY(-1px); /* Subtle lift effect */
+}
+
 
 .postList {
   list-style: none;
@@ -26,44 +59,56 @@
 }
 
 .postItem {
-  /* .card class from main.css will provide base styling */
-  /* Additional post-specific styling can go here if needed */
-  margin-bottom: 1.5rem; /* More spacing between posts */
+  /* .card class from main.css provides base: background, border, border-radius, padding */
+  margin-bottom: 1.5rem; /* Spacing between posts */
+  padding: 1rem; /* Ensure consistent padding if .card doesn't provide enough */
+  border-bottom: 1px solid var(--border-color-light); /* Clearer separation */
+  transition: box-shadow 0.2s ease-in-out; /* Add hover effect */
+}
+
+.postItem:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Subtle shadow on hover */
 }
 
 .postTitle {
   margin-top: 0; /* Remove default heading margin if inside card */
-  margin-bottom: 0.5rem;
-  font-size: 1.25rem; /* Slightly larger title for posts */
+  margin-bottom: 0.3rem; /* Reduced space below title */
+  font-size: 1.35rem; /* Slightly larger title */
+  font-weight: 600; /* Bolder title */
 }
 
 .postTitle a {
   text-decoration: none;
-  color: var(--text-color); /* Use default text color or a specific link color */
+  color: var(--text-color-strong); 
 }
 
 .postTitle a:hover {
-  color: var(--primary-color); /* Link hover color */
+  color: var(--primary-color);
+  text-decoration: underline; /* Add underline on hover for clarity */
 }
 
 .postMeta {
-  font-size: 0.85rem;
-  color: var(--secondary-color); /* Gray for meta text */
-  margin-bottom: 0.75rem;
-  display: block; /* Make it a block to take its own line or for margin */
+  font-size: 0.8rem; /* Slightly smaller meta */
+  color: var(--text-color-muted); /* Muted color for meta */
+  margin-bottom: 0.5rem; /* Reduced space below meta */
+  display: block; 
 }
 
 .postMeta a {
-  color: var(--secondary-color);
-  text-decoration: underline;
+  color: var(--text-color-muted); /* Consistent muted color */
+  text-decoration: none; /* No underline by default */
+  font-weight: 500; /* Slightly bolder for community/author links */
 }
 
 .postMeta a:hover {
   color: var(--primary-color);
+  text-decoration: underline; /* Underline on hover */
 }
 
 .postVote {
-  margin-top: 0.75rem;
+  margin-top: 0.5rem; /* Reduced space above vote */
+  padding-top: 0.5rem; /* Add some padding if needed */
+  border-top: 1px solid var(--border-color-extralight); /* Very subtle separator above vote */
 }
 
 /* Responsive adjustments for HomePage layout */
@@ -74,8 +119,13 @@
 
   .mainContent,
   .sidebar {
-    flex-basis: 100%; /* Both take full width when stacked */
-    min-width: unset; /* Reset min-width */
-    border-left: none; /* Remove sidebar border if it was added */
+    flex-basis: 100%; 
+    min-width: unset; 
+    border-left: none; 
+    /* Consider adding some vertical space between stacked main and sidebar */
+    margin-bottom: 1rem; 
+  }
+  .sidebar {
+    margin-bottom: 0; /* No margin for the last element */
   }
 }
