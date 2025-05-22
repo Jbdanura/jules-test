@@ -20,7 +20,31 @@ const PostPage = () => {
   const [newCommentText, setNewCommentText] = useState(''); // State for new comment text
   const [submittingComment, setSubmittingComment] = useState(false); // State for comment submission
   const [errorSubmitComment, setErrorSubmitComment] = useState(null); // State for comment submission error
-  const [errorAction, setErrorAction] = useState(null); // State for general actions like delete/edit errors
+
+  const handleEditPost = () => {
+    console.log('Edit post button clicked for post ID:', postId);
+    alert('Edit post functionality is not yet implemented.');
+  };
+
+  const handleDeletePost = async () => { // Consider making it async if API call is added later
+    console.log('Delete post button clicked for post ID:', postId);
+    // Prompt for confirmation
+    if (window.confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+      console.log('User confirmed deletion for post ID:', postId);
+      // Placeholder for actual deletion logic:
+      // try {
+      //   // Example: await apiDeletePost(postId);
+      //   alert('Post successfully deleted.');
+      //   // Redirect or update UI, e.g., navigate('/', { replace: true });
+      // } catch (error) {
+      //   console.error('Failed to delete post:', error);
+      //   alert('Failed to delete post. See console for details.');
+      // }
+      alert('Post deletion functionality is not yet fully implemented. Confirmed deletion for now.');
+    } else {
+      console.log('User cancelled deletion for post ID:', postId);
+    }
+  };
 
   // Helper to format date
   const formatDate = (dateString) => {
@@ -154,13 +178,12 @@ const PostPage = () => {
             initialScore={post.score !== undefined ? post.score : (post.upvotes - post.downvotes) || 0} 
           />
         </div>
-        {isAuthenticated && user && (post.author?._id === user._id || post.author?.id === user.id) && (
-          <div className={styles.postActions}>
-            <Link to={`/edit-post/${postId}`} className={styles.actionButton}>Edit Post</Link>
-            <button onClick={handleDeletePost} className={`${styles.actionButton} ${styles.deleteButton}`}>Delete Post</button>
+        {isAuthenticated && user && post && post.author && (String(user.id) === String(post.author.id) || String(user.id) === String(post.author._id) || String(user._id) === String(post.author.id) || String(user._id) === String(post.author._id)) && (
+          <div className={styles.postActions}> {/* Conditionally render actions */}
+            <button onClick={handleEditPost} className={styles.actionButton}>Edit Post</button>
+            <button onClick={handleDeletePost} className={styles.actionButton}>Delete Post</button>
           </div>
         )}
-        {errorAction && <p className={`error-message ${styles.actionError}`}>{errorAction}</p>}
       </div>
       
       <div className={styles.commentsSection}>
