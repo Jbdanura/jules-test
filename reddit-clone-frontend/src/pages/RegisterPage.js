@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Added useEffect
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../services/api'; // Using the configured Axios instance
+// Removed direct api import, register will come from useAuth
 import { useAuth } from '../contexts/AuthContext';
 
 const RegisterPage = () => {
@@ -10,23 +10,26 @@ const RegisterPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { register, isAuthenticated } = useAuth(); // register from context
 
-  if (isAuthenticated) {
-    navigate('/dashboard'); // Redirect if already logged in
-  }
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
     try {
-      await api.post('/auth/register', { username, email, password });
+      // Call register from AuthContext, which calls api.register
+      await register({ username, email, password });
       setSuccess('Registration successful! Please login.');
-      // Optionally redirect to login page after a delay or let user click
-      setTimeout(() => navigate('/login'), 2000);
+      setTimeout(() => navigate('/login'), 2000); // Redirect to login after 2s
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError(err.response?.data?.message || err.message || 'Registration failed. Please try again.');
       console.error("Registration error:", err.response?.data || err.message);
     }
   };

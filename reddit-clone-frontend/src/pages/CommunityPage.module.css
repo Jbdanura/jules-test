@@ -1,0 +1,81 @@
+/* CommunityPage.module.css */
+
+.communityPage {
+  padding: 1rem;
+  max-width: 900px; /* Constrain width for better readability */
+  margin: 0 auto;
+}
+
+.communityHeaderCard {
+  /* .card class from main.css will provide base styling */
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+}
+
+.communityHeaderCard h2 {
+  margin-top: 0;
+  color: var(--primary-color);
+}
+
+.communityHeaderCard p {
+  font-size: 1rem;
+  color: var(--secondary-color);
+  margin-bottom: 0.5rem;
+}
+
+.communityHeaderCard small {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.postsHeading {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 0.5rem;
+}
+
+.postList {
+  list-style: none;
+  padding: 0;
+}
+
+.postItem {
+  /* .card class from main.css will provide base styling */
+  margin-bottom: 1.5rem;
+}
+
+.postTitle {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+}
+
+.postTitle a {
+  text-decoration: none;
+  color: var(--text-color);
+}
+
+.postTitle a:hover {
+  color: var(--primary-color);
+}
+
+.postMeta {
+  font-size: 0.85rem;
+  color: var(--secondary-color);
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.postMeta a {
+  color: var(--secondary-color);
+  text-decoration: underline;
+}
+
+.postMeta a:hover {
+  color: var(--primary-color);
+}
+
+.postVote {
+  margin-top: 0.75rem;
+}
