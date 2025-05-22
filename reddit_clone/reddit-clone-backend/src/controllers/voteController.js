@@ -38,7 +38,7 @@ exports.votePost = async (req, res) => {
 
     } catch (error) {
         console.error("Vote post error:", error);
-        res.status(500).json({ message: 'Error voting on post.', error: error.message });
+        res.status(500).json({ message: 'Error voting on post.', errorMessage: error.message });
     }
 };
 
@@ -74,6 +74,6 @@ exports.voteComment = async (req, res) => {
 
     } catch (error) {
         console.error("Vote comment error:", error);
-        res.status(500).json({ message: 'Error voting on comment.', error: error.message });
+    res.status(500).json({ message: 'Error voting on comment.', errorMessage: error.message });
     }
 };
