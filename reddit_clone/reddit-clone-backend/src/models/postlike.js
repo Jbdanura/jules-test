@@ -63,6 +63,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     } catch (error) {
       console.error('Error in PostLike.afterSave hook for like ID:', like.id, error);
+      throw error; // Add this line
     }
   });
 
@@ -93,6 +94,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     } catch (error) {
       console.error('Error in PostLike.afterDestroy hook for like ID:', like.id, error);
+      throw error; // Add this line
     }
   });
 

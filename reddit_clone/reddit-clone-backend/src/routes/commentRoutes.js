@@ -12,4 +12,10 @@ router.get('/post/:postId', commentController.getCommentsByPost);
 // GET /api/comments/user/:userId - Get all comments by a specific user (public)
 router.get('/user/:userId', commentController.getCommentsByUserId);
 
+// PUT /api/comments/:commentId - Update a comment (protected)
+router.put('/:commentId', protect, commentController.updateComment);
+
+// DELETE /api/comments/:commentId - Delete a comment (protected)
+router.delete('/:commentId', protect, commentController.deleteComment);
+
 module.exports = router;

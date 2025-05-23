@@ -97,3 +97,64 @@ exports.getCommentsByUserId = async (req, res) => {
         res.status(500).json({ message: 'Error fetching comments by user', error: error.message });
     }
 };
+
+// Update a comment
+exports.updateComment = async (req, res) => {
+    try {
+        const { commentId } = req.params;
+        const { content } = req.body;
+        const userId = req.user.id;
+
+        if (!content || content.trim() === "") {
+            return res.status(400).json({ message: 'Comment content cannot be empty.' });
+        }
+
+        const comment = await Comment.findByPk(commentId);
+
+        if (!comment) {
+            return res.status(404).json({ message: 'Comment not found.' });
+        }
+
+        if (comment.userId !== userId) {
+            return res.status(403).json({ message: 'User not authorized to update this comment.' });
+        }
+
+        comment.content = content;
+        await comment.save();
+
+        // Eager load author for the response
+        const updatedCommentWithAuthor = await Comment.findByPk(comment.id, {
+            include: [{ model: User, as: 'author', attributes: ['id', 'username'] }]
+        });
+
+        res.status(200).json({ message: 'Comment updated successfully!', comment: updatedCommentWithAuthor });
+    } catch (error) {
+        console.error("Update comment error:", error);
+        res.status(500).json({ message: 'Error updating comment', error: error.message });
+    }
+};
+
+// Delete a comment
+exports.deleteComment = async (req, res) => {
+    try {
+        const { commentId } = req.params;
+        const userId = req.user.id;
+
+        const comment = await Comment.findByPk(commentId);
+
+        if (!comment) {
+            return res.status(404).json({ message: 'Comment not found.' });
+        }
+
+        if (comment.userId !== userId) {
+            return res.status(403).json({ message: 'User not authorized to delete this comment.' });
+        }
+
+        await comment.destroy();
+
+        res.status(200).json({ message: 'Comment deleted successfully!' });
+    } catch (error) {
+        console.error("Delete comment error:", error);
+        res.status(500).json({ message: 'Error deleting comment', error: error.message });
+    }
+};
