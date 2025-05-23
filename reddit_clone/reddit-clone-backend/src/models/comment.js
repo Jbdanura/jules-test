@@ -41,6 +41,12 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 0,
     },
+    score: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.likeCount - this.dislikeCount;
+      }
+    },
     userId: { // Added userId to model definition
         type: DataTypes.INTEGER,
         allowNull: false,

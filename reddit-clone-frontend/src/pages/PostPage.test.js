@@ -83,6 +83,12 @@ describe('PostPage Component', () => {
 
     expect(screen.getByText('Test Post Title')).toBeInTheDocument();
     expect(screen.getByText('Test post content.')).toBeInTheDocument();
+    
+    // Verify author link
+    const authorLink = screen.getByText(mockPost.author.username).closest('a');
+    expect(authorLink).toBeInTheDocument();
+    expect(authorLink).toHaveAttribute('href', `/profile/${mockPost.author._id}`);
+    
     expect(screen.getByText('First comment!')).toBeInTheDocument();
     expect(screen.getByText('Second comment.')).toBeInTheDocument();
   });
@@ -151,8 +157,8 @@ describe('PostPage Component', () => {
       await waitFor(() => {
         expect(screen.getByText('Test Post Title')).toBeInTheDocument();
       });
-      expect(screen.getByText('Edit Post')).toBeInTheDocument();
-      expect(screen.getByText('Delete Post')).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /Edit/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Delete/i })).toBeInTheDocument();
     });
 
     it('hides Edit/Delete buttons if user is not the author', async () => {
@@ -161,18 +167,18 @@ describe('PostPage Component', () => {
       await waitFor(() => {
         expect(screen.getByText('Test Post Title')).toBeInTheDocument();
       });
-      expect(screen.queryByText('Edit Post')).not.toBeInTheDocument();
-      expect(screen.queryByText('Delete Post')).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: /Edit/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /Delete/i })).not.toBeInTheDocument();
     });
 
     it('handles post deletion from PostPage', async () => {
         renderPostPage(); // mockPost.author is mockUser
-        await waitFor(() => { expect(screen.getByText('Edit Post')).toBeInTheDocument(); });
+        await waitFor(() => { expect(screen.getByRole('link', { name: /Edit/i })).toBeInTheDocument(); });
         
         window.confirm = jest.fn(() => true);
         api.deletePost.mockResolvedValueOnce({});
 
-        fireEvent.click(screen.getByText('Delete Post'));
+        fireEvent.click(screen.getByRole('button', { name: /Delete/i }));
 
         expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete this post?');
         await waitFor(() => {

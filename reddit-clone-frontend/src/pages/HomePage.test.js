@@ -55,9 +55,21 @@ describe('HomePage Component', () => {
     await waitFor(() => {
       expect(api.getAllPosts).toHaveBeenCalledTimes(1);
     });
-    expect(screen.getByText('Post 1 by TestUser')).toBeInTheDocument();
-    expect(screen.getByText('Post 2 by OtherUser')).toBeInTheDocument();
-    expect(screen.getByText('Post 3 by TestUser')).toBeInTheDocument();
+
+    mockPostsList.forEach(post => {
+      // Check post title is displayed
+      expect(screen.getByText(post.title)).toBeInTheDocument();
+      
+      // Check author username is displayed and is a link to their profile
+      if (post.author) {
+        const authorLink = screen.getByText(post.author.username, { exact: false }).closest('a'); // Use exact: false if 'by' is part of the text node
+        expect(authorLink).toBeInTheDocument();
+        expect(authorLink).toHaveAttribute('href', `/profile/${post.author._id || post.author.id}`);
+      } else {
+        // Handle case where post might not have an author, if applicable
+        // For this test, all mock posts have authors
+      }
+    });
   });
 
   describe('Authenticated User - Post Actions (Edit/Delete)', () => {
@@ -73,43 +85,42 @@ describe('HomePage Component', () => {
       const post1Item = screen.getByText('Post 1 by TestUser').closest(`.${styles.postItem}`); // Assuming styles.postItem is on the card div
       expect(post1Item).toBeInTheDocument();
       // Use within to scope queries to post1Item
-      // Note: The class names from HomePage.module.css (styles.actionButton, styles.deleteButton)
-      // might not be directly usable if not exported or known.
-      // We can rely on text or more generic selectors if needed.
-      // For this test, we'll assume the buttons are present and check their text.
-      expect(within(post1Item).getByText('Edit')).toBeInTheDocument();
-      expect(within(post1Item).getByText('Delete')).toBeInTheDocument();
+      const { within } = require('@testing-library/dom'); // Ensure within is imported/required
+
+      const post1Item = screen.getByText(mockPostsList[0].title).closest(`.${styles.postItem}`);
+      expect(post1Item).toBeInTheDocument();
+      expect(within(post1Item).getByRole('link', { name: /Edit/i})).toBeInTheDocument();
+      expect(within(post1Item).getByRole('button', { name: /Delete/i})).toBeInTheDocument();
 
 
       // Post 2 (authored by OtherUser)
-      const post2Item = screen.getByText('Post 2 by OtherUser').closest(`.${styles.postItem}`);
+      const post2Item = screen.getByText(mockPostsList[1].title).closest(`.${styles.postItem}`);
       expect(post2Item).toBeInTheDocument();
-      expect(within(post2Item).queryByText('Edit')).not.toBeInTheDocument();
-      expect(within(post2Item).queryByText('Delete')).not.toBeInTheDocument();
+      expect(within(post2Item).queryByRole('link', { name: /Edit/i})).not.toBeInTheDocument();
+      expect(within(post2Item).queryByRole('button', { name: /Delete/i})).not.toBeInTheDocument();
       
       // Post 3 (authored by mockUser)
-      const post3Item = screen.getByText('Post 3 by TestUser').closest(`.${styles.postItem}`);
+      const post3Item = screen.getByText(mockPostsList[2].title).closest(`.${styles.postItem}`);
       expect(post3Item).toBeInTheDocument();
-      expect(within(post3Item).getByText('Edit')).toBeInTheDocument();
-      expect(within(post3Item).getByText('Delete')).toBeInTheDocument();
+      expect(within(post3Item).getByRole('link', { name: /Edit/i})).toBeInTheDocument();
+      expect(within(post3Item).getByRole('button', { name: /Delete/i})).toBeInTheDocument();
     });
 
     it('handles post deletion successfully from homepage', async () => {
-      // Need to import `within` for scoped queries if not already done
       const { within } = require('@testing-library/dom');
       
-      api.getAllPosts.mockResolvedValueOnce({ data: [...mockPostsList] }); // Initial load
-      api.deletePost.mockResolvedValueOnce({}); // Mock successful deletion
-      window.confirm = jest.fn(() => true); // Mock window.confirm
+      api.getAllPosts.mockResolvedValueOnce({ data: [...mockPostsList] });
+      api.deletePost.mockResolvedValueOnce({});
+      window.confirm = jest.fn(() => true);
 
       renderHomePage(authState);
 
       await waitFor(() => {
-        expect(screen.getByText('Post 1 by TestUser')).toBeInTheDocument();
+        expect(screen.getByText(mockPostsList[0].title)).toBeInTheDocument();
       });
 
-      const post1Item = screen.getByText('Post 1 by TestUser').closest(`.${styles.postItem}`);
-      const deleteButtonPost1 = within(post1Item).getByText('Delete');
+      const post1Item = screen.getByText(mockPostsList[0].title).closest(`.${styles.postItem}`);
+      const deleteButtonPost1 = within(post1Item).getByRole('button', { name: /Delete/i});
       
       fireEvent.click(deleteButtonPost1);
 
@@ -118,10 +129,9 @@ describe('HomePage Component', () => {
       await waitFor(() => {
         expect(api.deletePost).toHaveBeenCalledWith(mockPostsList[0]._id);
       });
-      // Post should be removed from the UI
-      expect(screen.queryByText('Post 1 by TestUser')).not.toBeInTheDocument();
-      expect(screen.getByText('Post 2 by OtherUser')).toBeInTheDocument(); // Other posts still there
-      expect(screen.getByText('Post 3 by TestUser')).toBeInTheDocument();
+      expect(screen.queryByText(mockPostsList[0].title)).not.toBeInTheDocument();
+      expect(screen.getByText(mockPostsList[1].title)).toBeInTheDocument();
+      expect(screen.getByText(mockPostsList[2].title)).toBeInTheDocument();
     });
     
     it('shows an error message if post deletion fails on homepage', async () => {
@@ -133,19 +143,17 @@ describe('HomePage Component', () => {
         renderHomePage(authState);
   
         await waitFor(() => {
-          expect(screen.getByText('Post 1 by TestUser')).toBeInTheDocument();
+          expect(screen.getByText(mockPostsList[0].title)).toBeInTheDocument();
         });
         
-        const post1Item = screen.getByText('Post 1 by TestUser').closest(`.${styles.postItem}`);
-        const deleteButtonPost1 = within(post1Item).getByText('Delete');
+        const post1Item = screen.getByText(mockPostsList[0].title).closest(`.${styles.postItem}`);
+        const deleteButtonPost1 = within(post1Item).getByRole('button', { name: /Delete/i});
         fireEvent.click(deleteButtonPost1);
   
         await waitFor(() => {
-          // Check for the global error message display defined in HomePage.js
           expect(screen.getByText('Deletion failed on home')).toBeInTheDocument(); 
         });
-        // Post should still be in the UI
-        expect(screen.getByText('Post 1 by TestUser')).toBeInTheDocument();
+        expect(screen.getByText(mockPostsList[0].title)).toBeInTheDocument();
       });
   });
 

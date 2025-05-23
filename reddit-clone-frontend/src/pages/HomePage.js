@@ -82,7 +82,16 @@ const HomePage = () => {
                   ) : (
                     "General" 
                   )}
-                  {post.author ? ` by ${post.author.username}` : " by Anonymous"}
+                  {post.author ? (
+                    <>
+                      {' by '}
+                      <Link to={`/profile/${post.author._id || post.author.id}`}>
+                        {post.author.username}
+                      </Link>
+                    </>
+                  ) : (
+                    " by Anonymous"
+                  )}
                   {/* Consider adding post timestamp here */}
                 </small>
                 <div className={styles.postVote}>

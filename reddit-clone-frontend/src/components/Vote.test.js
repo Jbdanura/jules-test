@@ -37,7 +37,7 @@ describe('Vote Component', () => {
     const entityType = 'post';
 
     it('sends { type: "like" } when upvote is clicked for a post and updates score', async () => {
-      api.votePost.mockResolvedValueOnce({ data: { score: initialScore + 1 } });
+      api.votePost.mockResolvedValueOnce({ data: { post: { score: initialScore + 1 } } });
       renderVoteComponent({ entityId, entityType, initialScore });
 
       fireEvent.click(screen.getByLabelText('Upvote'));
@@ -49,7 +49,7 @@ describe('Vote Component', () => {
     });
 
     it('sends { type: "dislike" } when downvote is clicked for a post and updates score', async () => {
-      api.votePost.mockResolvedValueOnce({ data: { score: initialScore - 1 } });
+      api.votePost.mockResolvedValueOnce({ data: { post: { score: initialScore - 1 } } });
       renderVoteComponent({ entityId, entityType, initialScore });
 
       fireEvent.click(screen.getByLabelText('Downvote'));
@@ -79,7 +79,7 @@ describe('Vote Component', () => {
     const entityType = 'comment';
 
     it('sends { type: "like" } when upvote is clicked for a comment and updates score', async () => {
-      api.voteComment.mockResolvedValueOnce({ data: { score: initialScore + 1 } });
+      api.voteComment.mockResolvedValueOnce({ data: { comment: { score: initialScore + 1 } } });
       renderVoteComponent({ entityId, entityType, initialScore });
 
       fireEvent.click(screen.getByLabelText('Upvote'));
@@ -91,7 +91,7 @@ describe('Vote Component', () => {
     });
 
     it('sends { type: "dislike" } when downvote is clicked for a comment and updates score', async () => {
-      api.voteComment.mockResolvedValueOnce({ data: { score: initialScore - 1 } });
+      api.voteComment.mockResolvedValueOnce({ data: { comment: { score: initialScore - 1 } } });
       renderVoteComponent({ entityId, entityType, initialScore });
 
       fireEvent.click(screen.getByLabelText('Downvote'));

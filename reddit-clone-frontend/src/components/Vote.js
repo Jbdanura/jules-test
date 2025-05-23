@@ -52,8 +52,12 @@ const Vote = ({ entityId, entityType, initialScore }) => {
         throw new Error('Invalid entity type for voting.');
       }
 
-      if (response && response.data && response.data.score !== undefined) {
-        setScore(response.data.score);
+      if (response && response.data) {
+        if (entityType === 'post' && response.data.post && response.data.post.score !== undefined) {
+          setScore(response.data.post.score);
+        } else if (entityType === 'comment' && response.data.comment && response.data.comment.score !== undefined) {
+          setScore(response.data.comment.score);
+        }
       }
     } catch (err) {
       setScore(initialScore); 

@@ -150,7 +150,14 @@ const PostPage = () => {
                 </Link>
               </>
             )}
-            {post.author && ` | By: ${post.author.username}`}
+            {post.author && (
+              <>
+                {' | By: '}
+                <Link to={`/profile/${post.author._id || post.author.id}`}>
+                  {post.author.username}
+                </Link>
+              </>
+            )}
           </span>
         </div>
         <p className={styles.postBody}>{post.content}</p>
@@ -158,9 +165,16 @@ const PostPage = () => {
           <Vote 
             entityId={post._id || post.id} 
             entityType="post" 
-            initialScore={post.score !== undefined ? post.score : (post.upvotes - post.downvotes) || 0} 
+            initialScore={post.score || 0} 
           />
         </div>
+        {isAuthenticated && user && post.author && (user._id === post.author._id || user.id === post.author.id) && (
+          <div className={styles.postActions}>
+            <Link to={`/edit-post/${post._id || post.id}`} className={styles.actionButton}>Edit</Link>
+            <button onClick={handleDeletePost} className={`${styles.actionButton} ${styles.deleteButton}`}>Delete</button>
+          </div>
+        )}
+        {errorAction && <p className={`error-message ${styles.actionGlobalError}`}>{errorAction}</p>}
       </div>
       
       <div className={styles.commentsSection}>
