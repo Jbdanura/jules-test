@@ -26,9 +26,8 @@ const PostPage = () => {
     alert('Edit post functionality is not yet implemented.');
   };
 
-  const handleDeletePost = async () => { // Consider making it async if API call is added later
+  const handleDeletePost = async () => {
     console.log('Delete post button clicked for post ID:', postId);
-    // Prompt for confirmation
     if (window.confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
       console.log('User confirmed deletion for post ID:', postId);
       // Placeholder for actual deletion logic:
@@ -178,12 +177,6 @@ const PostPage = () => {
             initialScore={post.score !== undefined ? post.score : (post.upvotes - post.downvotes) || 0} 
           />
         </div>
-        {isAuthenticated && user && post && post.author && (String(user.id) === String(post.author.id) || String(user.id) === String(post.author._id) || String(user._id) === String(post.author.id) || String(user._id) === String(post.author._id)) && (
-          <div className={styles.postActions}> {/* Conditionally render actions */}
-            <button onClick={handleEditPost} className={styles.actionButton}>Edit Post</button>
-            <button onClick={handleDeletePost} className={styles.actionButton}>Delete Post</button>
-          </div>
-        )}
       </div>
       
       <div className={styles.commentsSection}>
