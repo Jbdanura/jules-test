@@ -20,30 +20,14 @@ const PostPage = () => {
   const [newCommentText, setNewCommentText] = useState(''); // State for new comment text
   const [submittingComment, setSubmittingComment] = useState(false); // State for comment submission
   const [errorSubmitComment, setErrorSubmitComment] = useState(null); // State for comment submission error
+  const [errorAction,setErrorAction] = useState("")
 
   const handleEditPost = () => {
     console.log('Edit post button clicked for post ID:', postId);
     alert('Edit post functionality is not yet implemented.');
   };
 
-  const handleDeletePost = async () => {
-    console.log('Delete post button clicked for post ID:', postId);
-    if (window.confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
-      console.log('User confirmed deletion for post ID:', postId);
-      // Placeholder for actual deletion logic:
-      // try {
-      //   // Example: await apiDeletePost(postId);
-      //   alert('Post successfully deleted.');
-      //   // Redirect or update UI, e.g., navigate('/', { replace: true });
-      // } catch (error) {
-      //   console.error('Failed to delete post:', error);
-      //   alert('Failed to delete post. See console for details.');
-      // }
-      alert('Post deletion functionality is not yet fully implemented. Confirmed deletion for now.');
-    } else {
-      console.log('User cancelled deletion for post ID:', postId);
-    }
-  };
+
 
   // Helper to format date
   const formatDate = (dateString) => {
