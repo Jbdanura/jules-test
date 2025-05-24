@@ -162,7 +162,22 @@ const PostPage = () => {
           />
         </div>
         {/* Container for action buttons */}
-        {isAuthenticated && user && post && post.author && user.id === post.author.id && (
+        {(() => {
+          // Log only when post, post.author, and user are available to avoid preliminary errors
+          if (post && post.author && user) {
+            console.log(
+              'Auth Check for Edit/Delete Buttons:',
+              'isAuthenticated:', isAuthenticated,
+              'user.id:', user.id, 
+              'typeof user.id:', typeof user.id,
+              'post.author.id:', post.author.id, 
+              'typeof post.author.id:', typeof post.author.id,
+              'Comparison (user.id === post.author.id):', user.id === post.author.id
+            );
+          }
+          // The actual condition for rendering
+          return isAuthenticated && user && post && post.author && user.id === post.author.id;
+        })() && (
           <div className={styles.postActions}>
             <button onClick={handleEditPost} className={styles.actionButton}>
               Edit Post

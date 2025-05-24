@@ -68,7 +68,25 @@ const Vote = ({ entityId, entityType, initialScore }) => {
     } catch (err) {
       setScore(initialScore);
       setError(err.response?.data?.message || err.message || 'Failed to cast vote.');
-      console.error(`Vote error for ${entityType} ${entityId}:`, err);
+      
+      // Enhanced logging:
+      console.error(`Vote error for entityType '${entityType}', entityId '${entityId}':`, err);
+      if (err.isAxiosError) { // Check if it's an AxiosError
+        console.error("Axios error details:");
+        if (err.response) {
+          console.error("Response data:", err.response.data);
+          console.error("Response status:", err.response.status);
+          console.error("Response headers:", err.response.headers);
+        }
+        if (err.request) {
+          console.error("Request data:", err.request); // This might be an XMLHttpRequest instance
+        }
+        if (err.config) {
+          console.error("Request config:", err.config);
+        }
+      } else {
+        console.error("Non-Axios error details:", err);
+      }
     }
   };
 

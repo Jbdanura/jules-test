@@ -47,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
   // Hooks to update Post's likeCount and dislikeCount
   PostLike.afterSave(async (like, options) => {
     console.log('PostLike.afterSave hook fired for like ID:', like.id, 'Type:', like.type, 'PostID:', like.postId, 'UserID:', like.userId);
-    console.log('Options:', JSON.stringify(options, null, 2));
+    console.log(`Hook PostLike afterSave called with transaction ID (if available): ${options && options.transaction && options.transaction.id}`);
     try {
       const post = await like.getPost({ transaction: options.transaction }); // Pass transaction
       if (post) {
@@ -68,7 +68,7 @@ module.exports = (sequelize, DataTypes) => {
 
   PostLike.afterDestroy(async (like, options) => {
     console.log('PostLike.afterDestroy hook fired for like ID:', like.id, 'Type:', like.type, 'PostID:', like.postId, 'UserID:', like.userId);
-    console.log('Options:', JSON.stringify(options, null, 2));
+    console.log(`Hook PostLike afterDestroy called with transaction ID (if available): ${options && options.transaction && options.transaction.id}`);
     try {
       const postId = like.postId; // Get postId from the instance being destroyed
       if (postId) {

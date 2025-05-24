@@ -92,7 +92,27 @@ const HomePage = () => {
                     initialScore={post.score !== undefined ? post.score : (post.upvotes - post.downvotes) || 0} 
                   />
                 </div>
-                {isAuthenticated && user && (post.author?._id === user._id || post.author?.id === user.id) && (
+                {(() => {
+                  // Determine ownership based on available ID fields (id or _id)
+                  const postAuthorId = post.author?.id || post.author?._id;
+                  const currentUserId = user?.id || user?._id;
+                  const isOwner = isAuthenticated && user && post && post.author && postAuthorId === currentUserId;
+
+                  // Log details if essential objects are present
+                  if (post && user) { // post.author might be legitimately null/undefined if post has no author
+                    console.log(
+                      `HomePage Auth Check - Post ID: ${post._id || post.id}, Post Title: "${post.title}"`,
+                      'isAuthenticated:', isAuthenticated,
+                      'Current User ID:', currentUserId, 
+                      'Typeof Current User ID:', typeof currentUserId,
+                      'Post Author Object:', post.author, // Log the whole author object for inspection
+                      'Post Author ID (used for check):', postAuthorId, 
+                      'Typeof Post Author ID:', typeof postAuthorId,
+                      'Calculated isOwner:', isOwner
+                    );
+                  }
+                  return isOwner;
+                })() && (
                   <div className={styles.postActions}> {/* Add a class for styling */}
                     <Link to={`/edit-post/${post._id || post.id}`} className={styles.actionButton}>Edit</Link>
                     <button onClick={() => handleDeletePost(post._id || post.id)} className={`${styles.actionButton} ${styles.deleteButton}`}>Delete</button>
