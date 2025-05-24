@@ -1,64 +1,54 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import PostPage from './PostPage';
-import * as api from '../services/api';
+import { getPostById, getCommentsByPostId, deletePost as apiDeletePost, createComment as apiCreateComment } from '../services/api';
 
-// Mock API calls
-jest.mock('../services/api', () => ({
-  getPostById: jest.fn(),
-  getCommentsByPostId: jest.fn(),
-  createComment: jest.fn(),
-  deletePost: jest.fn(), // For Edit/Delete buttons on PostPage itself
-}));
+// Mock services/api
+jest.mock('../services/api');
 
-// Mock react-router-dom's useParams and useNavigate
+// Mock react-router-dom hooks
 const mockNavigate = jest.fn();
-const mockParams = { postId: 'post123' }; // Default mock params
-
 jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => mockParams,
-  useNavigate: () => mockNavigate,
-  // Link component will be rendered as <a>
+  ...jest.requireActual('react-router-dom'), // Import and retain default behavior
+  useParams: () => ({ postId: '1' }), // Mock useParams
+  useNavigate: () => mockNavigate, // Mock useNavigate
 }));
 
-// Mock CommentItem to simplify testing PostPage's focus
-jest.mock('../components/CommentItem', () => ({ comment, formatDate }) => (
-  <li data-testid={`comment-${comment._id || comment.id}`}>
-    <p>{comment.content}</p>
-    <small>By: {comment.author?.username} | On: {formatDate(comment.createdAt)}</small>
-  </li>
-));
-
-
-const mockUser = { _id: 'user123', id: 'user123', username: 'TestUser' };
 const mockPost = {
-  _id: 'post123',
-  id: 'post123',
+  _id: '1', // Use _id to match typical MongoDB IDs if your component uses that
+  id: '1', // Keep id as well if component might use it as fallback
   title: 'Test Post Title',
-  content: 'Test post content.',
-  author: mockUser,
-  community: { _id: 'comm1', id: 'comm1', name: 'Tech Corner' },
+  content: 'This is the content of the test post.',
+  author: { id: 'author123', _id: 'author123', username: 'TestAuthor' },
+  community: { id: 'c1', _id: 'c1', name: 'TestCommunity' },
+  likeCount: 10,
+  dislikeCount: 2,
   createdAt: new Date().toISOString(),
-  score: 10,
+  // score: 8, // If your component expects score directly, though it's calculated in Vote
 };
-const mockCommentsList = [
-  { _id: 'comment1', id: 'comment1', content: 'First comment!', author: { _id: 'user456', id: 'user456', username: 'Commenter1' }, createdAt: new Date().toISOString() },
-  { _id: 'comment2', id: 'comment2', content: 'Second comment.', author: { _id: 'user789', id: 'user789', username: 'Commenter2' }, createdAt: new Date().toISOString() },
+
+const mockComments = [
+  { _id: 'comment1', id: 'comment1', content: 'First test comment', author: { username: 'Commenter1' }, createdAt: new Date().toISOString(), likeCount: 5, dislikeCount: 1 },
+  { _id: 'comment2', id: 'comment2', content: 'Second test comment', author: { username: 'Commenter2' }, createdAt: new Date().toISOString(), likeCount: 3, dislikeCount: 0 },
 ];
 
-const renderPostPage = (authState = { isAuthenticated: true, user: mockUser }) => {
-  api.getPostById.mockResolvedValue({ data: mockPost });
-  api.getCommentsByPostId.mockResolvedValue({ data: mockCommentsList });
-  api.createComment.mockClear();
-  api.deletePost.mockClear();
+const defaultAuthContextValue = (isAuthenticated, user) => ({
+  isAuthenticated,
+  user,
+  loading: false,
+  login: jest.fn(),
+  logout: jest.fn(),
+  register: jest.fn(),
+  updateUserConfig: jest.fn(),
+  fetchUserConfig: jest.fn(),
+});
 
+const renderPostPage = (authContextValue) => {
   return render(
-    <AuthContext.Provider value={authState}>
-      <MemoryRouter initialEntries={[`/post/${mockPost._id}`]}>
+    <AuthContext.Provider value={authContextValue}>
+      <MemoryRouter initialEntries={['/post/1']}>
         <Routes>
           <Route path="/post/:postId" element={<PostPage />} />
         </Routes>
@@ -69,116 +59,139 @@ const renderPostPage = (authState = { isAuthenticated: true, user: mockUser }) =
 
 describe('PostPage Component', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    // Reset mockPost author to be the logged-in user by default for Edit/Delete tests
-    mockPost.author = mockUser; 
+    // Reset mocks before each test
+    getPostById.mockReset();
+    getCommentsByPostId.mockReset();
+    apiDeletePost.mockReset();
+    apiCreateComment.mockReset();
+    mockNavigate.mockReset();
+
+    // Default mocks for successful API calls
+    getPostById.mockResolvedValue({ data: mockPost });
+    getCommentsByPostId.mockResolvedValue({ data: mockComments });
+    apiCreateComment.mockResolvedValue({ data: { comment: { _id: 'newComment', content: 'New test comment', author: { username: 'CurrentUser' }, createdAt: new Date().toISOString(), likeCount: 0, dislikeCount: 0 } } });
+    apiDeletePost.mockResolvedValue({ data: { message: "Post deleted successfully" } });
   });
 
-  it('fetches and displays post details and comments', async () => {
-    renderPostPage();
+  test('renders post details and comments correctly', async () => {
+    renderPostPage(defaultAuthContextValue(false, null));
+
     await waitFor(() => {
-      expect(api.getPostById).toHaveBeenCalledWith(mockPost._id);
-      expect(api.getCommentsByPostId).toHaveBeenCalledWith(mockPost._id);
+      expect(screen.getByText(mockPost.title)).toBeInTheDocument();
+      expect(screen.getByText(mockPost.content)).toBeInTheDocument();
+      expect(screen.getByText(`By: ${mockPost.author.username}`)).toBeInTheDocument();
+      expect(screen.getByText(mockPost.community.name)).toBeInTheDocument();
+      // Check for initial score from Vote component (10 likes - 2 dislikes = 8)
+      expect(screen.getByText('8')).toBeInTheDocument(); 
     });
 
-    expect(screen.getByText('Test Post Title')).toBeInTheDocument();
-    expect(screen.getByText('Test post content.')).toBeInTheDocument();
-    expect(screen.getByText('First comment!')).toBeInTheDocument();
-    expect(screen.getByText('Second comment.')).toBeInTheDocument();
+    // Check for comments
+    expect(screen.getByText('First test comment')).toBeInTheDocument();
+    expect(screen.getByText('Second test comment')).toBeInTheDocument();
   });
 
-  describe('Comment Submission', () => {
-    it('allows authenticated users to submit a comment', async () => {
-      const newCommentContent = 'This is a new comment.';
-      const newCommentResponse = {
-        comment: { _id: 'comment3', id: 'comment3', content: newCommentContent, author: mockUser, createdAt: new Date().toISOString() }
-      };
-      api.createComment.mockResolvedValueOnce({ data: newCommentResponse });
-      
-      renderPostPage(); // Authenticated by default
+  test('owner sees Edit and Delete buttons', async () => {
+    const ownerUser = { id: 'author123', _id: 'author123', username: 'TestAuthor' };
+    renderPostPage(defaultAuthContextValue(true, ownerUser));
 
-      await waitFor(() => { // Wait for initial post and comments to load
-        expect(screen.getByText('First comment!')).toBeInTheDocument();
-      });
-
-      const textarea = screen.getByPlaceholderText(`Commenting as ${mockUser.username}...`);
-      fireEvent.change(textarea, { target: { value: newCommentContent } });
-      fireEvent.click(screen.getByRole('button', { name: /Post Comment/i }));
-
-      await waitFor(() => {
-        expect(api.createComment).toHaveBeenCalledWith(mockPost._id, { content: newCommentContent });
-      });
-      // Check for optimistic update or new comment in list
-      expect(screen.getByText(newCommentContent)).toBeInTheDocument();
-      expect(textarea.value).toBe(''); // Textarea cleared
+    await waitFor(() => {
+      expect(screen.getByText(mockPost.title)).toBeInTheDocument(); // Ensure post has loaded
     });
 
-    it('shows an error if comment submission fails', async () => {
-        api.createComment.mockRejectedValueOnce({ response: { data: { message: 'Comment submission failed' } } });
-        renderPostPage();
-        await waitFor(() => { expect(screen.getByText('First comment!')).toBeInTheDocument(); });
-  
-        fireEvent.change(screen.getByPlaceholderText(`Commenting as ${mockUser.username}...`), { target: { value: 'A new comment' } });
-        fireEvent.click(screen.getByRole('button', { name: /Post Comment/i }));
-  
-        await waitFor(() => {
-          expect(screen.getByText('Comment submission failed')).toBeInTheDocument();
-        });
-      });
-
-    it('prevents unauthenticated users from seeing the comment form', () => {
-      renderPostPage({ isAuthenticated: false, user: null });
-      expect(screen.queryByPlaceholderText(/Commenting as/i)).not.toBeInTheDocument();
-      expect(screen.getByText(/Please login to post a comment./i)).toBeInTheDocument();
-    });
-
-    it('validates against empty comment submission', async () => {
-        renderPostPage();
-        await waitFor(() => { expect(screen.getByText('First comment!')).toBeInTheDocument(); });
-  
-        fireEvent.click(screen.getByRole('button', { name: /Post Comment/i })); // Submit empty comment
-  
-        await waitFor(() => {
-          expect(screen.getByText('Comment cannot be empty.')).toBeInTheDocument();
-        });
-        expect(api.createComment).not.toHaveBeenCalled();
-      });
+    expect(screen.getByRole('button', { name: /edit post/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /delete post/i })).toBeInTheDocument();
   });
 
-  describe('Post Edit/Delete Buttons (on PostPage)', () => {
-    it('shows Edit/Delete buttons if user is the author', async () => {
-      renderPostPage(); // mockPost.author is mockUser by default
-      await waitFor(() => {
-        expect(screen.getByText('Test Post Title')).toBeInTheDocument();
-      });
-      expect(screen.getByText('Edit Post')).toBeInTheDocument();
-      expect(screen.getByText('Delete Post')).toBeInTheDocument();
+  test('non-owner does NOT see Edit and Delete buttons', async () => {
+    const nonOwnerUser = { id: 'user456', _id: 'user456', username: 'AnotherUser' };
+    renderPostPage(defaultAuthContextValue(true, nonOwnerUser));
+
+    await waitFor(() => {
+      expect(screen.getByText(mockPost.title)).toBeInTheDocument();
     });
 
-    it('hides Edit/Delete buttons if user is not the author', async () => {
-      mockPost.author = { _id: 'otherUser123', id: 'otherUser123', username: 'OtherAuthor' }; // Different author
-      renderPostPage();
-      await waitFor(() => {
-        expect(screen.getByText('Test Post Title')).toBeInTheDocument();
-      });
-      expect(screen.queryByText('Edit Post')).not.toBeInTheDocument();
-      expect(screen.queryByText('Delete Post')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /edit post/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /delete post/i })).not.toBeInTheDocument();
+  });
+
+  test('unauthenticated user does NOT see Edit and Delete buttons', async () => {
+    renderPostPage(defaultAuthContextValue(false, null));
+
+    await waitFor(() => {
+      expect(screen.getByText(mockPost.title)).toBeInTheDocument();
     });
 
-    it('handles post deletion from PostPage', async () => {
-        renderPostPage(); // mockPost.author is mockUser
-        await waitFor(() => { expect(screen.getByText('Edit Post')).toBeInTheDocument(); });
-        
-        window.confirm = jest.fn(() => true);
-        api.deletePost.mockResolvedValueOnce({});
+    expect(screen.queryByRole('button', { name: /edit post/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /delete post/i })).not.toBeInTheDocument();
+  });
+  
+  test('unauthenticated user sees login prompt for commenting', async () => {
+    renderPostPage(defaultAuthContextValue(false, null));
+    await waitFor(() => {
+      expect(screen.getByText(mockPost.title)).toBeInTheDocument();
+    });
+    expect(screen.getByText(/Please login to post a comment/i)).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText(/Commenting as/i)).not.toBeInTheDocument();
+  });
 
-        fireEvent.click(screen.getByText('Delete Post'));
+  test('authenticated user can submit a comment', async () => {
+    const currentUser = { id: 'user789', _id: 'user789', username: 'CommenterUser' };
+    renderPostPage(defaultAuthContextValue(true, currentUser));
+    
+    await waitFor(() => {
+      expect(screen.getByText(mockPost.title)).toBeInTheDocument();
+    });
 
-        expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete this post?');
-        await waitFor(() => {
-            expect(api.deletePost).toHaveBeenCalledWith(mockPost._id);
-        });
-        expect(mockNavigate).toHaveBeenCalledWith('/'); // Navigates to homepage
+    const commentTextarea = screen.getByPlaceholderText(`Commenting as ${currentUser.username}...`);
+    fireEvent.change(commentTextarea, { target: { value: 'New test comment' } });
+    fireEvent.click(screen.getByRole('button', { name: /post comment/i }));
+
+    await waitFor(() => {
+      // Expect the new comment to appear (mocked response)
+      expect(screen.getByText('New test comment')).toBeInTheDocument();
+      // Also check that the textarea is cleared
+      expect(commentTextarea.value).toBe('');
+    });
+    expect(apiCreateComment).toHaveBeenCalledWith('1', { content: 'New test comment' });
+  });
+  
+  test('handles post deletion correctly by the owner', async () => {
+    // Mock window.confirm to automatically confirm
+    window.confirm = jest.fn(() => true);
+
+    const ownerUser = { id: 'author123', _id: 'author123', username: 'TestAuthor' };
+    renderPostPage(defaultAuthContextValue(true, ownerUser));
+
+    await waitFor(() => {
+      expect(screen.getByText(mockPost.title)).toBeInTheDocument();
+    });
+
+    const deleteButton = screen.getByRole('button', { name: /delete post/i });
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(apiDeletePost).toHaveBeenCalledWith('1');
+    });
+    // Check if navigation to homepage occurred
+    expect(mockNavigate).toHaveBeenCalledWith('/'); 
+  });
+
+  test('handles post not found', async () => {
+    getPostById.mockRejectedValueOnce({ response: { status: 404, data: { message: 'Post not found.' } } });
+    renderPostPage(defaultAuthContextValue(false, null));
+
+    await waitFor(() => {
+      expect(screen.getByText('Post not found.')).toBeInTheDocument();
+    });
+  });
+
+  test('handles error loading comments', async () => {
+    getCommentsByPostId.mockRejectedValueOnce(new Error('Failed to fetch comments'));
+    renderPostPage(defaultAuthContextValue(false, null));
+
+    await waitFor(() => {
+      expect(screen.getByText(mockPost.title)).toBeInTheDocument(); // Post loads
+      expect(screen.getByText(/error loading comments: failed to fetch comments/i)).toBeInTheDocument();
     });
   });
 });

@@ -10,6 +10,8 @@ exports.votePost = async (req, res) => {
     const { type } = req.body; // 'like', 'dislike', or 'none'/'remove'
     const userId = req.user.id;
 
+    console.log(`[votePost] Received request for postId: ${postId}. User ID: ${userId}. Request body:`, req.body);
+    console.log(`[votePost] Validating vote type. Received type: '${type}' for postId: ${postId}`);
     if (!['like', 'dislike', 'none', 'remove'].includes(type)) {
         return res.status(400).json({ message: 'Invalid vote type.' });
     }
@@ -47,6 +49,8 @@ exports.voteComment = async (req, res) => {
     const { type } = req.body; // 'like', 'dislike', or 'none'/'remove'
     const userId = req.user.id;
 
+    console.log(`[voteComment] Received request for commentId: ${commentId}. User ID: ${userId}. Request body:`, req.body);
+    console.log(`[voteComment] Validating vote type. Received type: '${type}' for commentId: ${commentId}`);
     if (!['like', 'dislike', 'none', 'remove'].includes(type)) {
         return res.status(400).json({ message: 'Invalid vote type.' });
     }

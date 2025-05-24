@@ -158,9 +158,21 @@ const PostPage = () => {
           <Vote 
             entityId={post._id || post.id} 
             entityType="post" 
-            initialScore={post.score !== undefined ? post.score : (post.upvotes - post.downvotes) || 0} 
+            initialScore={(post.likeCount || 0) - (post.dislikeCount || 0)} 
           />
         </div>
+        {/* Container for action buttons */}
+        {isAuthenticated && user && post && post.author && user.id === post.author.id && (
+          <div className={styles.postActions}>
+            <button onClick={handleEditPost} className={styles.actionButton}>
+              Edit Post
+            </button>
+            <button onClick={handleDeletePost} className={`${styles.actionButton} ${styles.deleteButton}`}>
+              Delete Post
+            </button>
+            {errorAction && <p className={`error-message ${styles.actionError}`}>{errorAction}</p>}
+          </div>
+        )}
       </div>
       
       <div className={styles.commentsSection}>

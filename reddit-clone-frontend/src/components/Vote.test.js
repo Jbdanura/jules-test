@@ -1,124 +1,176 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import Vote from './Vote';
-import * as api from '../services/api'; // To mock votePost and voteComment
+import { votePost, voteComment } from '../services/api';
 
-// Mock the API service functions
-jest.mock('../services/api', () => ({
-  votePost: jest.fn(),
-  voteComment: jest.fn(),
-}));
+// Mock the API service
+jest.mock('../services/api');
 
-const mockAuthContext = (isAuthenticated) => ({
+const mockAuthContextValue = (isAuthenticated, userId = 'user123') => ({
   isAuthenticated,
-  user: isAuthenticated ? { id: 'user123', username: 'TestUser' } : null,
+  user: isAuthenticated ? { id: userId, username: 'testuser' } : null,
+  loading: false,
+  login: jest.fn(),
+  logout: jest.fn(),
+  register: jest.fn(),
+  updateUserConfig: jest.fn(),
+  fetchUserConfig: jest.fn(),
 });
 
-const renderVoteComponent = (props, authState = { isAuthenticated: true }) => {
+const renderVoteComponent = (authValue, props) => {
   return render(
-    <AuthContext.Provider value={mockAuthContext(authState.isAuthenticated)}>
+    <AuthContext.Provider value={authValue}>
       <Vote {...props} />
     </AuthContext.Provider>
   );
 };
 
 describe('Vote Component', () => {
-  const entityId = 'entity1';
-  const initialScore = 10;
+  const entityId = 'post1';
+  const entityTypePost = 'post';
+  const entityTypeComment = 'comment';
+  const initialScore = 5;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    // Clear all mocks before each test
+    votePost.mockClear();
+    voteComment.mockClear();
   });
 
-  // Test for Post Votes
-  describe('Voting on a Post', () => {
-    const entityType = 'post';
+  // Test Cases for Score Update
+  test('updates score on upvote for post when authenticated', async () => {
+    const expectedLikeCount = initialScore + 1;
+    const expectedDislikeCount = 0;
+    votePost.mockResolvedValueOnce({ data: { post: { likeCount: expectedLikeCount, dislikeCount: expectedDislikeCount } } });
+    const authValue = mockAuthContextValue(true);
+    renderVoteComponent(authValue, { entityId, entityType: entityTypePost, initialScore });
 
-    it('sends { type: "like" } when upvote is clicked for a post and updates score', async () => {
-      api.votePost.mockResolvedValueOnce({ data: { score: initialScore + 1 } });
-      renderVoteComponent({ entityId, entityType, initialScore });
+    expect(screen.getByText(initialScore.toString())).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Upvote'));
 
-      fireEvent.click(screen.getByLabelText('Upvote'));
-
-      await waitFor(() => {
-        expect(api.votePost).toHaveBeenCalledWith(entityId, { type: 'like' });
-      });
-      expect(screen.getByText(initialScore + 1)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText((expectedLikeCount - expectedDislikeCount).toString())).toBeInTheDocument();
     });
-
-    it('sends { type: "dislike" } when downvote is clicked for a post and updates score', async () => {
-      api.votePost.mockResolvedValueOnce({ data: { score: initialScore - 1 } });
-      renderVoteComponent({ entityId, entityType, initialScore });
-
-      fireEvent.click(screen.getByLabelText('Downvote'));
-
-      await waitFor(() => {
-        expect(api.votePost).toHaveBeenCalledWith(entityId, { type: 'dislike' });
-      });
-      expect(screen.getByText(initialScore - 1)).toBeInTheDocument();
-    });
-
-    it('displays an error message if voting on a post fails', async () => {
-      api.votePost.mockRejectedValueOnce({ response: { data: { message: 'Post vote failed' } } });
-      renderVoteComponent({ entityId, entityType, initialScore });
-
-      fireEvent.click(screen.getByLabelText('Upvote'));
-
-      await waitFor(() => {
-        expect(screen.getByText('Post vote failed')).toBeInTheDocument();
-      });
-      // Score should revert or remain initialScore on error
-      expect(screen.getByText(initialScore)).toBeInTheDocument();
-    });
+    expect(votePost).toHaveBeenCalledWith(entityId, { type: 'like' });
   });
 
-  // Test for Comment Votes
-  describe('Voting on a Comment', () => {
-    const entityType = 'comment';
+  test('updates score on downvote for post when authenticated', async () => {
+    const expectedLikeCount = initialScore;
+    const expectedDislikeCount = 1; // Assuming downvote adds one dislike
+    votePost.mockResolvedValueOnce({ data: { post: { likeCount: expectedLikeCount, dislikeCount: expectedDislikeCount } } });
+    const authValue = mockAuthContextValue(true);
+    renderVoteComponent(authValue, { entityId, entityType: entityTypePost, initialScore });
 
-    it('sends { type: "like" } when upvote is clicked for a comment and updates score', async () => {
-      api.voteComment.mockResolvedValueOnce({ data: { score: initialScore + 1 } });
-      renderVoteComponent({ entityId, entityType, initialScore });
+    expect(screen.getByText(initialScore.toString())).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Downvote'));
 
-      fireEvent.click(screen.getByLabelText('Upvote'));
-
-      await waitFor(() => {
-        expect(api.voteComment).toHaveBeenCalledWith(entityId, { type: 'like' });
-      });
-      expect(screen.getByText(initialScore + 1)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText((expectedLikeCount - expectedDislikeCount).toString())).toBeInTheDocument();
     });
-
-    it('sends { type: "dislike" } when downvote is clicked for a comment and updates score', async () => {
-      api.voteComment.mockResolvedValueOnce({ data: { score: initialScore - 1 } });
-      renderVoteComponent({ entityId, entityType, initialScore });
-
-      fireEvent.click(screen.getByLabelText('Downvote'));
-
-      await waitFor(() => {
-        expect(api.voteComment).toHaveBeenCalledWith(entityId, { type: 'dislike' });
-      });
-      expect(screen.getByText(initialScore - 1)).toBeInTheDocument();
-    });
+    expect(votePost).toHaveBeenCalledWith(entityId, { type: 'dislike' });
   });
 
-  // Test for Unauthenticated User
-  describe('Unauthenticated User', () => {
-    it('displays an error message when an unauthenticated user tries to vote', async () => {
-      renderVoteComponent({ entityId, entityType: 'post', initialScore }, { isAuthenticated: false });
+  test('updates score on upvote for comment when authenticated', async () => {
+    const commentEntityId = 'comment1';
+    const commentInitialScore = 3;
+    const expectedLikeCount = commentInitialScore + 1;
+    const expectedDislikeCount = 0;
+    voteComment.mockResolvedValueOnce({ data: { comment: { likeCount: expectedLikeCount, dislikeCount: expectedDislikeCount } } });
+    const authValue = mockAuthContextValue(true);
+    renderVoteComponent(authValue, { entityId: commentEntityId, entityType: entityTypeComment, initialScore: commentInitialScore });
 
-      fireEvent.click(screen.getByLabelText('Upvote'));
+    expect(screen.getByText(commentInitialScore.toString())).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Upvote'));
 
-      // Error message "Please login to vote." should appear
-      await waitFor(() => {
-        expect(screen.getByText('Please login to vote.')).toBeInTheDocument();
-      });
-      // API should not have been called
-      expect(api.votePost).not.toHaveBeenCalled();
-      expect(api.voteComment).not.toHaveBeenCalled();
-      // Score should remain unchanged
-      expect(screen.getByText(initialScore)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText((expectedLikeCount - expectedDislikeCount).toString())).toBeInTheDocument();
     });
+    expect(voteComment).toHaveBeenCalledWith(commentEntityId, { type: 'like' });
+  });
+  
+  test('updates score on downvote for comment when authenticated', async () => {
+    const commentEntityId = 'comment2';
+    const commentInitialScore = 7;
+    const expectedLikeCount = commentInitialScore; 
+    const expectedDislikeCount = 1;
+    voteComment.mockResolvedValueOnce({ data: { comment: { likeCount: expectedLikeCount, dislikeCount: expectedDislikeCount } } });
+    const authValue = mockAuthContextValue(true);
+    renderVoteComponent(authValue, { entityId: commentEntityId, entityType: entityTypeComment, initialScore: commentInitialScore });
+
+    expect(screen.getByText(commentInitialScore.toString())).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Downvote'));
+
+    await waitFor(() => {
+      expect(screen.getByText((expectedLikeCount - expectedDislikeCount).toString())).toBeInTheDocument();
+    });
+    expect(voteComment).toHaveBeenCalledWith(commentEntityId, { type: 'dislike' });
+  });
+
+  // Test Cases for Login Prompt
+  test('shows login prompt on upvote when unauthenticated', async () => {
+    const authValue = mockAuthContextValue(false);
+    renderVoteComponent(authValue, { entityId, entityType: entityTypePost, initialScore });
+
+    fireEvent.click(screen.getByLabelText('Upvote'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Please login to vote.')).toBeInTheDocument();
+    });
+    expect(votePost).not.toHaveBeenCalled();
+  });
+  
+  test('shows login prompt on downvote when unauthenticated', async () => {
+    const authValue = mockAuthContextValue(false);
+    renderVoteComponent(authValue, { entityId, entityType: entityTypePost, initialScore });
+
+    fireEvent.click(screen.getByLabelText('Downvote'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Please login to vote.')).toBeInTheDocument();
+    });
+    expect(votePost).not.toHaveBeenCalled();
+  });
+
+  // Test Cases for Error Handling
+  test('handles API error gracefully on upvote and reverts score', async () => {
+    const errorMessage = 'Failed to cast vote.';
+    votePost.mockRejectedValueOnce(new Error(errorMessage));
+    const authValue = mockAuthContextValue(true);
+    renderVoteComponent(authValue, { entityId, entityType: entityTypePost, initialScore });
+
+    const originalScoreText = initialScore.toString();
+    expect(screen.getByText(originalScoreText)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText('Upvote'));
+
+    await waitFor(() => {
+      expect(screen.getByText(new RegExp(errorMessage, "i"))).toBeInTheDocument();
+    });
+    
+    // Score should revert to initialScore.
+    expect(screen.getByText(originalScoreText)).toBeInTheDocument();
+    expect(votePost).toHaveBeenCalledWith(entityId, { type: 'like' });
+  });
+
+  test('handles API error gracefully on downvote for a comment and reverts score', async () => {
+    const errorMessage = 'Network Error';
+    voteComment.mockRejectedValueOnce({ response: { data: { message: errorMessage } } }); // More realistic error
+    const authValue = mockAuthContextValue(true);
+    const commentInitialScore = 7;
+    const commentEntityId = "commentXYZ";
+    renderVoteComponent(authValue, { entityId: commentEntityId, entityType: entityTypeComment, initialScore: commentInitialScore });
+
+    const originalScoreText = commentInitialScore.toString();
+    expect(screen.getByText(originalScoreText)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText('Downvote'));
+
+    await waitFor(() => {
+      expect(screen.getByText(new RegExp(errorMessage, "i"))).toBeInTheDocument();
+    });
+    
+    expect(screen.getByText(originalScoreText)).toBeInTheDocument();
+    expect(voteComment).toHaveBeenCalledWith(commentEntityId, { type: 'dislike' });
   });
 });

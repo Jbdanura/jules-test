@@ -52,11 +52,21 @@ const Vote = ({ entityId, entityType, initialScore }) => {
         throw new Error('Invalid entity type for voting.');
       }
 
-      if (response && response.data && response.data.score !== undefined) {
-        setScore(response.data.score);
+      if (response && response.data) {
+        let newScore;
+        if (response.data.post) {
+          newScore = (response.data.post.likeCount || 0) - (response.data.post.dislikeCount || 0);
+          setScore(newScore);
+        } else if (response.data.comment) {
+          newScore = (response.data.comment.likeCount || 0) - (response.data.comment.dislikeCount || 0);
+          setScore(newScore);
+        }
+        // If neither post nor comment is in response.data, the score is not updated from backend.
+        // This might happen if the backend response structure is different than expected.
+        // Consider adding a console warning here if necessary.
       }
     } catch (err) {
-      setScore(initialScore); 
+      setScore(initialScore);
       setError(err.response?.data?.message || err.message || 'Failed to cast vote.');
       console.error(`Vote error for ${entityType} ${entityId}:`, err);
     }
